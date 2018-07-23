@@ -26,6 +26,7 @@
 		028F3DAB2105F5530010C41B /* NotificationHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D992105F5530010C41B /* NotificationHelpers.swift */; };
 		028F3DAC2105F5530010C41B /* UIKitArtHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */; };
 		028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */; };
+		028F3DAF2105FD400010C41B /* TMLPersistentContainer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,7 @@
 		028F3D992105F5530010C41B /* NotificationHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHelpers.swift; sourceTree = "<group>"; };
 		028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitArtHelpers.swift; sourceTree = "<group>"; };
 		028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitControlHelpers.swift; sourceTree = "<group>"; };
+		028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TMLPersistentContainer.framework; path = Carthage/Build/iOS/TMLPersistentContainer.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				028F3DAF2105FD400010C41B /* TMLPersistentContainer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,6 +71,7 @@
 			children = (
 				028F3D7D2105F5210010C41B /* TMLPresentation */,
 				028F3D7C2105F5210010C41B /* Products */,
+				028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -371,6 +375,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = TMLPresentation/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -396,6 +404,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = TMLPresentation/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;

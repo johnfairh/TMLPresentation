@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import CoreData
+import TMLPersistentContainer
 
 /// Create the core data container and vend model services for the root model
 ///
@@ -31,7 +31,9 @@ public final class ModelProvider {
     /// 'load' is called later on
     public init(userDbName: String) {
         self.userDbName = userDbName
-        self.persistentContainer = NSPersistentContainer(name: userDbName)
+        self.persistentContainer = PersistentContainer(name: userDbName) { msg in
+            Log.log(msg.description)
+        }
     }
 
     /// Start creating a new core data stack during App.didLoad, quickly go async.
