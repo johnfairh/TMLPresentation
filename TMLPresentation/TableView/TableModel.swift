@@ -203,8 +203,22 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         
         return cell
     }
-    
+
     public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        guard let delegate = delegate else {
+            return false
+        }
+        let modelObject = getModelObjectAtIndexPath(indexPath)
+        return delegate.canDeleteObject(modelObject) ||
+               delegate.canMoveObject(modelObject)
+    }
+
+    public func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
+        let canDelete = delegate?.canDeleteObject(getModelObjectAtIndexPath(indexPath)) ?? false
+        return canDelete ? .delete : .none
+    }
+
+    public func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
         return delegate?.canDeleteObject(getModelObjectAtIndexPath(indexPath)) ?? false
     }
     
