@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02130A07210E0A8100410451 /* CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02130A06210E0A8100410451 /* CoreDataHelpers.swift */; };
 		028F3D802105F5210010C41B /* TMLPresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = 028F3D7E2105F5210010C41B /* TMLPresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		028F3D9C2105F5530010C41B /* TableModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D872105F5530010C41B /* TableModel.swift */; };
 		028F3D9D2105F5530010C41B /* TablePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D882105F5530010C41B /* TablePresenter.swift */; };
@@ -30,6 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		02130A06210E0A8100410451 /* CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataHelpers.swift; sourceTree = "<group>"; };
 		028F3D7B2105F5210010C41B /* TMLPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TMLPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		028F3D7E2105F5210010C41B /* TMLPresentation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TMLPresentation.h; sourceTree = "<group>"; };
 		028F3D7F2105F5210010C41B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				028F3D992105F5530010C41B /* NotificationHelpers.swift */,
 				028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */,
 				028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */,
+				02130A06210E0A8100410451 /* CoreDataHelpers.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -235,6 +238,7 @@
 				028F3DA12105F5530010C41B /* PresenterUI.swift in Sources */,
 				028F3DA02105F5530010C41B /* Presenter.swift in Sources */,
 				028F3DA32105F5530010C41B /* Model.swift in Sources */,
+				02130A07210E0A8100410451 /* CoreDataHelpers.swift in Sources */,
 				028F3DA82105F5530010C41B /* FoundationHelpers.swift in Sources */,
 				028F3DAB2105F5530010C41B /* NotificationHelpers.swift in Sources */,
 				028F3DA72105F5530010C41B /* ModelServices.swift in Sources */,
