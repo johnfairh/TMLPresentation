@@ -91,6 +91,17 @@ extension ModelObject where Self: NSManagedObject {
     public func stillExists(in model: Model) -> Bool {
         return model.objectExists(self)
     }
+
+    /// Set up a live query ready to run, using a given predicate
+    public static func createFetchedResults(model: Model,
+                                            predicate: NSPredicate? = nil,
+                                            sortedBy: [NSSortDescriptor] = [defaultSortDescriptor],
+                                            sectionNameKeyPath: String? = nil) -> ModelResults {
+        return model.createFetchedResults(entityName: entityName,
+                                          predicate: predicate,
+                                          sortedBy: sortedBy,
+                                          sectionNameKeyPath: sectionNameKeyPath)
+    }
     
     // MARK: - Sort Orders
     

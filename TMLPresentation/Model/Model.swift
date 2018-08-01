@@ -45,10 +45,16 @@ public protocol Model {
                  sortedBy: [NSSortDescriptor],
                  substitutionVariables vars: [String:AnyObject]) -> [NSManagedObject]
     
-    /// Find all objects in a given query and return a live controller holding them
+    /// Set up a live query ready to run, using predicates from the model
     func createFetchedResults(fetchReqName reqName: String,
                               sortedBy: [NSSortDescriptor],
                               substitutionVariables vars: [String:AnyObject],
+                              sectionNameKeyPath: String?) -> ModelResults
+
+    /// Set up a live query ready to run, using a given predicate
+    func createFetchedResults(entityName: String,
+                              predicate: NSPredicate?,
+                              sortedBy: [NSSortDescriptor] ,
                               sectionNameKeyPath: String?) -> ModelResults
 
     /// Clone a fetched-results-controller but with a different predicate

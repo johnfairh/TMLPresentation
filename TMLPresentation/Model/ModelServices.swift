@@ -168,12 +168,26 @@ open class ModelServices: Model {
     }
     
     
-    /// Find all objects in a given query and return a live controller holding them
+    /// Set up a live query ready to run, using a template in the data model
     public func createFetchedResults(fetchReqName reqName: String,
                                      sortedBy: [NSSortDescriptor],
                                      substitutionVariables vars: [String:AnyObject],
                                      sectionNameKeyPath: String?) -> ModelResults {
         let fetchReq = loadFetchRequest(reqName, sortedBy: sortedBy, substitutionVariables: vars)
+        return NSFetchedResultsController(fetchRequest: fetchReq,
+                                          managedObjectContext: managedObjectContext,
+                                          sectionNameKeyPath: sectionNameKeyPath,
+                                          cacheName: nil)
+    }
+
+    /// Set up a live query ready to run, using a given predicate
+    public func createFetchedResults(entityName: String,
+                                     predicate: NSPredicate?,
+                                     sortedBy: [NSSortDescriptor] ,
+                                     sectionNameKeyPath: String?) -> ModelResults {
+        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
+        fetchReq.predicate = predicate
+        fetchReq.sortDescriptors = sortedBy
         return NSFetchedResultsController(fetchRequest: fetchReq,
                                           managedObjectContext: managedObjectContext,
                                           sectionNameKeyPath: sectionNameKeyPath,
