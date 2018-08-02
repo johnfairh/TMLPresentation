@@ -104,7 +104,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     private      var fetchedResultsController: ModelResults
     private weak var delegate: DelegateType?
     private      var userMovingCells: Bool
-    private      let hasSections: Bool
+    private      var hasSections: Bool
+    private      var sectionTitleMap: [String : String]
     
     public init(tableView: UITableView,
                 fetchedResultsController: ModelResults,
@@ -114,8 +115,14 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         self.fetchedResultsController = fetchedResultsController
         self.delegate = delegate
         self.userMovingCells = false
-        self.hasSections = hasSections
+        self.hasSections = false
+        self.sectionTitleMap = [:]
         super.init()
+    }
+
+    public func configureSections(titleMap: [String : String]) {
+        hasSections = true
+        sectionTitleMap = titleMap
     }
 
     public func start() {
@@ -184,7 +191,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         var title: String? = nil
         if let sections = fetchedResultsController.sections {
-            title = sections[section].name
+            title = sectionTitleMap[sections[section].name]
         }
         return title
     }
