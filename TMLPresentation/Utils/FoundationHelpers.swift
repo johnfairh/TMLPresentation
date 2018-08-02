@@ -33,8 +33,12 @@ public enum Dispatch {
         DispatchQueue.main.async(execute: block )
     }
 
-    public static func toForegroundAfter(_ seconds: Int64, block: @escaping ()->()) {
-        let nanoseconds = seconds * Int64(NSEC_PER_SEC)
+    public static func toForegroundAfter(seconds: Int64, block: @escaping ()->()) {
+        toForegroundAfter(milliseconds: seconds * 1000, block: block)
+    }
+
+    public static func toForegroundAfter(milliseconds: Int64, block: @escaping ()->()) {
+        let nanoseconds = milliseconds * Int64(NSEC_PER_MSEC)
         let when = DispatchTime.now() + Double(nanoseconds) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: when, execute: block)
     }
