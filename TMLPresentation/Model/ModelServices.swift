@@ -48,6 +48,14 @@ open class ModelServices: Model {
         fetchReq.sortDescriptors = sortedBy
         return fetchReq as! NSFetchRequest<NSManagedObject>
     }
+
+    /// Helper to manually create a fetchrequest
+    func createFetchReq(entityName: String, predicate: NSPredicate?, sortedBy: [NSSortDescriptor]) -> NSFetchRequest<NSManagedObject> {
+        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
+        fetchReq.predicate = predicate
+        fetchReq.sortDescriptors = sortedBy
+        return fetchReq
+    }
     
     /// Helper to issue a request expecting one (or zero) object
     private func issueSingularFetchRequest(fetchReq: NSFetchRequest<NSManagedObject>) -> NSManagedObject? {
@@ -140,6 +148,12 @@ open class ModelServices: Model {
         let fetchReq = loadFetchRequest(fetchReqName, sortedBy: [sortDescriptor])
         return issueSingularFetchRequest(fetchReq: fetchReq)
     }
+
+    /// Find the 'first' object under some predicate + sort
+    public func findFirst(entityName: String, predicate: NSPredicate, sortedBy: [NSSortDescriptor]) -> NSManagedObject? {
+        let fetchReq = createFetchReq(entityName: entityName, predicate: predicate, sortedBy: sortedBy)
+        return issueSingularFetchRequest(fetchReq: fetchReq)
+    }
     
     /// Count the number of objects that would be returned by a findAll
     public func count(fetchReqName reqName:String, substitutionVariables vars: [String:AnyObject]) -> Int {
@@ -185,9 +199,9 @@ open class ModelServices: Model {
                                      predicate: NSPredicate?,
                                      sortedBy: [NSSortDescriptor] ,
                                      sectionNameKeyPath: String?) -> ModelResults {
-        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
-        fetchReq.predicate = predicate
-        fetchReq.sortDescriptors = sortedBy
+        let fetchReq = createFetchReq(entityName: entityName,
+                                      predicate: predicate,
+                                      sortedBy: sortedBy)
         return NSFetchedResultsController(fetchRequest: fetchReq,
                                           managedObjectContext: managedObjectContext,
                                           sectionNameKeyPath: sectionNameKeyPath,

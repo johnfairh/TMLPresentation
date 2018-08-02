@@ -26,7 +26,12 @@ public protocol ModelObject {
     
     /// Look up the 'first' instance - using the default sort order
     static func findFirst(from model: Model, fetchReqName: String) -> Self?
-    
+
+    /// Look up the 'first' instance under some predicate
+    static func findFirst(model: Model,
+                          predicate: NSPredicate,
+                          sortedBy: [NSSortDescriptor]) -> Self?
+
     /// Delete from the model
     func delete(from model: Model)
 
@@ -61,7 +66,6 @@ public struct ModelSortOrder {
 ///
 /// The parts remaining un-implemented are:
 ///   defaultSortDescriptor
-///   accept
 ///
 extension ModelObject where Self: NSManagedObject {
     private static var entityName: String {
@@ -83,6 +87,14 @@ extension ModelObject where Self: NSManagedObject {
     public static func findFirst(from model: Model, fetchReqName: String) -> Self? {
         return model.findFirst(sortDescriptor: defaultSortDescriptor, fetchReqName: fetchReqName) as? Self
     }
+
+    public static func findFirst(model: Model,
+                                 predicate: NSPredicate,
+                                 sortedBy: [NSSortDescriptor] = [defaultSortDescriptor]) -> Self? {
+        return model.findFirst(entityName: entityName,
+                               predicate: predicate,
+                               sortedBy: sortedBy) as? Self
+    }
     
     public func delete(from model:Model) {
         model.delete(self)
@@ -101,6 +113,16 @@ extension ModelObject where Self: NSManagedObject {
                                           predicate: predicate,
                                           sortedBy: sortedBy,
                                           sectionNameKeyPath: sectionNameKeyPath)
+    }
+
+    /// Default query for the object: no predicate, default sort order
+    public static func createAllResults(model: Model) -> ModelResults {
+        return createFetchedResults(model: model)
+    }
+
+    /// Helper to query all wrapped in a `ModelResultsSet`
+    public static func createAllResultsSet(model: Model) -> ModelResultsSet {
+        return createAllResults(model: model).asModelResultsSet
     }
     
     // MARK: - Sort Orders

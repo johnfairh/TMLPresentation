@@ -31,12 +31,19 @@ public protocol Model {
     /// Get the next sort order value for a particular MO + sort key
     func getNextSortOrderValue(_ entityName: String, keyName: String) -> Int64
 
+    // MARK: - Bespoke queries
+
     /// Find an object by name
     func find(_ entityName: String, name: String) -> NSManagedObject?
     
     /// Find the 'first' object under some query+sort
     func findFirst(sortDescriptor: NSSortDescriptor, fetchReqName: String) -> NSManagedObject?
-    
+
+    /// Find the 'first' object under some predicate + sort
+    func findFirst(entityName: String, predicate: NSPredicate, sortedBy: [NSSortDescriptor]) -> NSManagedObject?
+
+    // MARK: - General queries
+
     /// Count the number of objects that would be returned by a findAll
     func count(fetchReqName reqName:String, substitutionVariables vars: [String:AnyObject]) -> Int
 
@@ -44,7 +51,7 @@ public protocol Model {
     func findAll(fetchReqName reqName: String,
                  sortedBy: [NSSortDescriptor],
                  substitutionVariables vars: [String:AnyObject]) -> [NSManagedObject]
-    
+
     /// Set up a live query ready to run, using predicates from the model
     func createFetchedResults(fetchReqName reqName: String,
                               sortedBy: [NSSortDescriptor],
@@ -54,7 +61,7 @@ public protocol Model {
     /// Set up a live query ready to run, using a given predicate
     func createFetchedResults(entityName: String,
                               predicate: NSPredicate?,
-                              sortedBy: [NSSortDescriptor] ,
+                              sortedBy: [NSSortDescriptor],
                               sectionNameKeyPath: String?) -> ModelResults
 
     /// Clone a fetched-results-controller but with a different predicate
