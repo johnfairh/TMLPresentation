@@ -60,6 +60,9 @@ public protocol TableModelDelegate: class {
     
     /// For notification and propagation of height changes
     func objectsChanged()
+
+    /// Leading swipe actions
+    func leadingSwipeActionsForObject(_ modelObject: ModelType) -> UISwipeActionsConfiguration?
 }
 
 /// Extension to provide safe defaults
@@ -71,6 +74,7 @@ public extension TableModelDelegate {
     func selectObject(_ modelObject: ModelObject) {}
     func cellClassForObject(_ modelObject: ModelType) -> AnyClass? { return nil }
     func objectsChanged() {}
+    func leadingSwipeActionsForObject(_ modelObject: ModelType) -> UISwipeActionsConfiguration? { return nil }
 }
 
 // MARK: - TableModel
@@ -220,6 +224,10 @@ public final class TableModel<CellType, DelegateType> : NSObject,
 
     public func tableView(_ tableView: UITableView, shouldIndentWhileEditingRowAt indexPath: IndexPath) -> Bool {
         return delegate?.canDeleteObject(getModelObjectAtIndexPath(indexPath)) ?? false
+    }
+
+    public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        return delegate?.leadingSwipeActionsForObject(getModelObjectAtIndexPath(indexPath))
     }
     
     public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
