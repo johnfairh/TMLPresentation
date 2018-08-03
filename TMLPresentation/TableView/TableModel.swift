@@ -42,11 +42,19 @@ public protocol TableCell {
 ///
 public protocol TableModelDelegate: class {
     associatedtype ModelType
+    associatedtype SectionType
 
     func canDeleteObject(_ modelObject: ModelType) -> Bool
     func deleteObject(_ modelObject: ModelType)
+
+    /// Police start of a reorder - default false
     func canMoveObject(_ modelObject: ModelType) -> Bool
-    func moveObject(_ from: ModelType, fromRow: Int, toRow: Int)
+    /// Police end of a reorder - default true
+    func canMoveObjectTo(_ modelObject: ModelType, toSection: SectionType, toRowInSection: Int) -> Bool
+    /// Actually do the move - implement one of these depending on whether you have sections
+    func moveObject(_ modelObject: ModelType, fromRow: Int, toRow: Int)
+    func moveObject(_ modelObject: ModelType, fromRowInSection: Int,
+                    toSection: SectionType, toRowInSection: Int)
     
     /// This next is ModelObject rather than ModelType because Swift does not permit
     /// contravariant matching of arg types -- ie. we cannot fulfill this method if it
@@ -63,18 +71,29 @@ public protocol TableModelDelegate: class {
 
     /// Leading swipe actions
     func leadingSwipeActionsForObject(_ modelObject: ModelType) -> UISwipeActionsConfiguration?
+
+    /// Sections decoding
+    func getSectionTitle(name: String) -> String
+    func getSectionObject(name: String) -> SectionType
 }
 
 /// Extension to provide safe defaults
 public extension TableModelDelegate {
     func canDeleteObject(_ modelObject: ModelType) -> Bool { return false }
     func deleteObject(_ modelObject: ModelType) {}
+
     func canMoveObject(_ modelObject: ModelType) -> Bool { return false }
+    func canMoveObjectTo(_ modelObject: ModelType, toSection: SectionType, toRowInSection: Int) -> Bool { return true }
     func moveObject(_ from: ModelType, fromRow: Int, toRow: Int) {}
+    func moveObject(_ modelObject: ModelType, fromRowInSection: Int,
+                    toSection: SectionType, toRowInSection: Int) {}
+
     func selectObject(_ modelObject: ModelObject) {}
     func cellClassForObject(_ modelObject: ModelType) -> AnyClass? { return nil }
     func objectsChanged() {}
     func leadingSwipeActionsForObject(_ modelObject: ModelType) -> UISwipeActionsConfiguration? { return nil }
+    func getSectionTitle(name: String) -> String { return name }
+    func getSectionObject(name: String) -> String { return name }
 }
 
 // MARK: - TableModel
@@ -104,25 +123,15 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     private      var fetchedResultsController: ModelResults
     private weak var delegate: DelegateType?
     private      var userMovingCells: Bool
-    private      var hasSections: Bool
-    private      var sectionTitleMap: [String : String]
-    
+
     public init(tableView: UITableView,
                 fetchedResultsController: ModelResults,
-                delegate: DelegateType,
-                hasSections: Bool = false) {
+                delegate: DelegateType) {
         self.tableView = tableView
         self.fetchedResultsController = fetchedResultsController
         self.delegate = delegate
         self.userMovingCells = false
-        self.hasSections = false
-        self.sectionTitleMap = [:]
         super.init()
-    }
-
-    public func configureSections(titleMap: [String : String]) {
-        hasSections = true
-        sectionTitleMap = titleMap
     }
 
     public func start() {
@@ -163,6 +172,13 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         }
         return cell
     }
+
+    private func getSectionAtIndexPath(_ indexPath: IndexPath) -> DelegateType.SectionType {
+        guard let delegate = delegate, let sections = fetchedResultsController.sections else {
+            Log.fatal("Can't progress, no delegate/sections")
+        }
+        return delegate.getSectionObject(name: sections[indexPath.section].name)
+    }
     
     // MARK: - UITableViewDelegate
     
@@ -190,8 +206,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     
     public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         var title: String? = nil
-        if let sections = fetchedResultsController.sections {
-            title = sectionTitleMap[sections[section].name]
+        if let delegate = delegate, let sections = fetchedResultsController.sections {
+            title = delegate.getSectionTitle(name: sections[section].name)
         }
         return title
     }
@@ -258,11 +274,15 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     public func tableView(_ tableView: UITableView,
                           targetIndexPathForMoveFromRowAt sourceIndexPath: IndexPath,
                           toProposedIndexPath proposedDestinationIndexPath: IndexPath) -> IndexPath {
-        // TODO move logic to delegate
-        if proposedDestinationIndexPath.section > 0 {
-            return sourceIndexPath
-        } else {
+        let object = getModelObjectAtIndexPath(sourceIndexPath)
+        let proposedSection = getSectionAtIndexPath(proposedDestinationIndexPath)
+        let moveOK = delegate?.canMoveObjectTo(object,
+                                               toSection: proposedSection,
+                                               toRowInSection: proposedDestinationIndexPath.row) ?? true
+        if moveOK {
             return proposedDestinationIndexPath
+        } else {
+            return sourceIndexPath
         }
     }
 
@@ -270,10 +290,13 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     public func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         if let delegate = delegate {
             let sourceObject = getModelObjectAtIndexPath(sourceIndexPath)
-            assert(delegate.canMoveObject(sourceObject))
             assert(!userMovingCells)
             userMovingCells = true
-            delegate.moveObject(sourceObject, fromRow: (sourceIndexPath as NSIndexPath).row, toRow: (destinationIndexPath as NSIndexPath).row)
+            delegate.moveObject(sourceObject, fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
+            delegate.moveObject(sourceObject,
+                                fromRowInSection: sourceIndexPath.row,
+                                toSection: getSectionAtIndexPath(destinationIndexPath),
+                                toRowInSection: destinationIndexPath.row)
             userMovingCells = false
         }
     }
@@ -297,10 +320,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     // any kind of incremental update if the table has sections.
     //
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        Log.debugLog("** TableModel.controllerWillChangeContent, hasSections = \(hasSections)")
-        if !hasSections {
-            tableView?.beginUpdates()
-        }
+        tableView?.beginUpdates()
     }
     
     public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
@@ -310,8 +330,10 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         switch type {
         case .insert:
             Log.debugLog("**** TableModel.section(insert) \(sectionIndex)")
+            tableView?.insertSections(IndexSet(integer: sectionIndex), with: .fade)
         case .delete:
             Log.debugLog("**** TableModel.section(delete) \(sectionIndex)")
+            tableView?.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
         default:
             Log.fatal("TableModel.section(??) Not sure what to do with \(type.rawValue)")
         }
@@ -341,7 +363,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         // Bail immediately if the table has sections because I am too dumb to mediate between
         // core data and ui kit.
         //
-        guard !userMovingCells && !hasSections else {
+        guard !userMovingCells else {
             return
         }
         
@@ -366,12 +388,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     }
     
     public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        Log.debugLog("** TableModel.controllerDidChangeContent hasSections=\(hasSections)")
-        if hasSections {
-            tableView?.reloadData()
-        } else {
-            tableView?.endUpdates()
-        }
+        tableView?.endUpdates()
         delegate?.objectsChanged()
     }
 }
