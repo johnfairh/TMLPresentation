@@ -55,9 +55,11 @@ public protocol ModelObject {
 /// Entities can have several such sortorders.
 public struct ModelSortOrder {
     public let keyName: String
+    public let ascending: Bool
     
-    public init(keyName: String) {
+    public init(keyName: String, ascending: Bool = true) {
         self.keyName = keyName
+        self.ascending = ascending
     }
 }
 

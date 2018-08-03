@@ -125,10 +125,14 @@ extension TablePresenter {
     /// We take the simple-but-working approach of grabbing all the objects,
     /// rearranging them, and then "renumbering" them in order to reflect
     /// that.
+    ///
+    /// This version works on the global objects list.
     public func moveAndRenumber(fromRow: Int, toRow: Int, sortOrder: ModelSortOrder) {
         guard var modelObjects = currentResults.fetchedObjects as? [ModelObject] else {
             fatalError("Confused somewhere, maybe before viewDidLoad()?")
         }
+
+        Log.log("MoveAndRenumber, \(fromRow) -> \(toRow)")
 
         let object = modelObjects.remove(at: fromRow)
         modelObjects.insert(object, at: toRow)
@@ -142,6 +146,9 @@ extension TablePresenter {
 
         // sort
         indexArray.sort()
+        if !sortOrder.ascending {
+            indexArray.reverse()
+        }
 
         // and reassign
         var index = 0
@@ -149,5 +156,31 @@ extension TablePresenter {
             object.setSortOrder(sortOrder, newValue: indexArray[index])
             index += 1
         }
+    }
+
+    /// Move and renumber in a sectioned table
+    public func moveAndRenumber(fromSectionName: String, fromRowInSection: Int,
+                                toSectionName: String, toRowInSection: Int,
+                                sortOrder: ModelSortOrder) {
+        let fromSectionOffset = currentResults.getOverallSectionOffset(sectionName: fromSectionName)
+        let toSectionOffset = currentResults.getOverallSectionOffset(sectionName: toSectionName)
+
+        moveAndRenumber(fromRow: fromSectionOffset + fromRowInSection,
+                        toRow: toSectionOffset + toRowInSection,
+                        sortOrder: sortOrder)
+    }
+}
+
+extension NSFetchedResultsController {
+    @objc func getOverallSectionOffset(sectionName: String) -> Int {
+        var index = 0
+        for section in sections! {
+            if section.name != sectionName {
+                index += section.numberOfObjects
+            } else {
+                return index
+            }
+        }
+        Log.fatal("Can't find section '\(sectionName)'")
     }
 }

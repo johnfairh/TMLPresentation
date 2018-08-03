@@ -53,7 +53,8 @@ public protocol TableModelDelegate: class {
     func canMoveObjectTo(_ modelObject: ModelType, toSection: SectionType, toRowInSection: Int) -> Bool
     /// Actually do the move - implement one of these depending on whether you have sections
     func moveObject(_ modelObject: ModelType, fromRow: Int, toRow: Int)
-    func moveObject(_ modelObject: ModelType, fromRowInSection: Int,
+    func moveObject(_ modelObject: ModelType,
+                    fromSection: SectionType, fromRowInSection: Int,
                     toSection: SectionType, toRowInSection: Int)
     
     /// This next is ModelObject rather than ModelType because Swift does not permit
@@ -85,7 +86,8 @@ public extension TableModelDelegate {
     func canMoveObject(_ modelObject: ModelType) -> Bool { return false }
     func canMoveObjectTo(_ modelObject: ModelType, toSection: SectionType, toRowInSection: Int) -> Bool { return true }
     func moveObject(_ from: ModelType, fromRow: Int, toRow: Int) {}
-    func moveObject(_ modelObject: ModelType, fromRowInSection: Int,
+    func moveObject(_ modelObject: ModelType,
+                    fromSection: SectionType, fromRowInSection: Int,
                     toSection: SectionType, toRowInSection: Int) {}
 
     func selectObject(_ modelObject: ModelObject) {}
@@ -279,6 +281,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         let moveOK = delegate?.canMoveObjectTo(object,
                                                toSection: proposedSection,
                                                toRowInSection: proposedDestinationIndexPath.row) ?? true
+        Log.log("*** canMove: \(moveOK)")
         if moveOK {
             return proposedDestinationIndexPath
         } else {
@@ -294,6 +297,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             userMovingCells = true
             delegate.moveObject(sourceObject, fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
             delegate.moveObject(sourceObject,
+                                fromSection: getSectionAtIndexPath(sourceIndexPath),
                                 fromRowInSection: sourceIndexPath.row,
                                 toSection: getSectionAtIndexPath(destinationIndexPath),
                                 toRowInSection: destinationIndexPath.row)
@@ -320,13 +324,19 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     // any kind of incremental update if the table has sections.
     //
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        tableView?.beginUpdates()
+        Log.debugLog("*** TableModel.controllerWillChangeContent - userMovingCells = \(userMovingCells)")
+        if !userMovingCells {
+            tableView?.beginUpdates()
+        }
     }
     
     public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
                            didChange sectionInfo: NSFetchedResultsSectionInfo,
                            atSectionIndex sectionIndex: Int,
                            for type: NSFetchedResultsChangeType) {
+        guard !userMovingCells else {
+            Log.fatal("Unexpected section create/delete during user interaction")
+        }
         switch type {
         case .insert:
             Log.debugLog("**** TableModel.section(insert) \(sectionIndex)")
@@ -364,6 +374,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         // core data and ui kit.
         //
         guard !userMovingCells else {
+            Log.debugLog("*** Bail: userMovingCells")
             return
         }
         
@@ -388,7 +399,10 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     }
     
     public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        tableView?.endUpdates()
+        Log.debugLog("*** TableModel.controllerDidChangeContent - userMovingCells = \(userMovingCells)")
+        if !userMovingCells {
+            tableView?.endUpdates()
+        }
         delegate?.objectsChanged()
     }
 }
