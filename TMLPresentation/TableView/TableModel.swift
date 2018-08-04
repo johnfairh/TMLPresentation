@@ -195,6 +195,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         if let sections = fetchedResultsController.sections {
             sectionCount = sections.count
         }
+        Log.debugLog("*** numberOfSection = \(sectionCount)")
         return sectionCount
     }
     
@@ -203,6 +204,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         if let sections = fetchedResultsController.sections {
             rows = sections[section].numberOfObjects
         }
+        Log.debugLog("*** numberOfRowsInSection \(section) = \(rows)")
         return rows
     }
     
@@ -231,6 +233,12 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         cell.configure(modelObject)
         
         return cell
+    }
+
+    public func refreshCell(indexPath: IndexPath) {
+        let modelObject = getModelObjectAtIndexPath(indexPath)
+        let cell = getCellAtIndexPath(indexPath)
+        cell.configure(modelObject)
     }
 
     public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -307,21 +315,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     
     // MARK: - NSFetchedResultsControllerDelegate
     
-    // Seeing problems with the NSFRC API when sections are used.  Eg. just one item in the query
-    // and it changes from section A to section B.  Core Data issues 'delete section 0',
-    // 'insert section 0', 'refresh object (0,0,)'.  This is wrong according to tableview's batch
-    // processing rules (it turns it into (1,0) because of the 'insert section').
-    //
-    // So we take advantage of Core Data sending all section updates before object updates and only
-    // do the batch update when there are no section updates.  If there are section updates -- rare --
-    // then we do no batch stuff and reload the entire table when core data is finished.
-    //
-    // What a mess.
-    //
-    // UPDATE 17th October.  Further mess.  If we have a one-entry view (ie section 0 key 0) and
-    // then delete it from the UI, core data sends us the item delete before the section delete.
-    // So, the above strat fails.  Giving up on solving this for now, instead we will just skip
-    // any kind of incremental update if the table has sections.
+    // iOS 12 -- touch wood but all the NSFRC vs. sectionated UITableView issues appear to
+    // be fixed!  All workarounds removed now.
     //
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         Log.debugLog("*** TableModel.controllerWillChangeContent - userMovingCells = \(userMovingCells)")
@@ -334,16 +329,17 @@ public final class TableModel<CellType, DelegateType> : NSObject,
                            didChange sectionInfo: NSFetchedResultsSectionInfo,
                            atSectionIndex sectionIndex: Int,
                            for type: NSFetchedResultsChangeType) {
-        guard !userMovingCells else {
-            Log.fatal("Unexpected section create/delete during user interaction")
-        }
         switch type {
         case .insert:
             Log.debugLog("**** TableModel.section(insert) \(sectionIndex)")
-            tableView?.insertSections(IndexSet(integer: sectionIndex), with: .fade)
+            if !userMovingCells {
+                tableView?.insertSections(IndexSet(integer: sectionIndex), with: .fade)
+            }
         case .delete:
             Log.debugLog("**** TableModel.section(delete) \(sectionIndex)")
-            tableView?.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
+            if !userMovingCells {
+                tableView?.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
+            }
         default:
             Log.fatal("TableModel.section(??) Not sure what to do with \(type.rawValue)")
         }
@@ -369,9 +365,6 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         // Bail immediately if the events are driven by user direct manipulation, in which
         // case the UI has already been updated by UITableView and we can only make things
         // look ugly or wrong.
-        //
-        // Bail immediately if the table has sections because I am too dumb to mediate between
-        // core data and ui kit.
         //
         guard !userMovingCells else {
             Log.debugLog("*** Bail: userMovingCells")

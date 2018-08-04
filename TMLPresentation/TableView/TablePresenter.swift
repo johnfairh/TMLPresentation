@@ -33,6 +33,9 @@ public protocol TablePresenterInterface {
     /// (output) Register a callback to update the view
     var reload: ((ModelResults) -> Void)? { get set }
 
+    /// (output) Register a callback to refresh one row of the view
+    var reloadRow: ((IndexPath) -> Void)? { get set }
+
     /// (output) should the view display associated chrome (segbar, +/edit buttons)
     var shouldEnableExtraControls: Bool { get }
 
@@ -97,6 +100,9 @@ open class TablePresenter<AppDirectorType> {
         }
     }
 
+    /// Callback from view to reload a table row
+    public var reloadRow: ((IndexPath) -> Void)?
+
     /// Change the displayed query
     public var currentResultsName: String {
         didSet {
@@ -135,7 +141,13 @@ extension TablePresenter {
         Log.log("MoveAndRenumber, \(fromRow) -> \(toRow)")
 
         let object = modelObjects.remove(at: fromRow)
-        modelObjects.insert(object, at: toRow)
+        let newToRow: Int
+        if toRow > fromRow {
+            newToRow = toRow - 1
+        } else {
+            newToRow = toRow
+        }
+        modelObjects.insert(object, at: newToRow)
 
         // get the list of indexes for reallocation
         var indexArray: [Int64] = []
@@ -169,6 +181,25 @@ extension TablePresenter {
                         toRow: toSectionOffset + toRowInSection,
                         sortOrder: sortOrder)
     }
+
+    public func getSectionRowCount(sectionName: String) -> Int {
+        return currentResults.getSectionRowCount(sectionName: sectionName)
+    }
+
+    /// Helper to refresh a row in the UI - needed if the updates are masked from core data somehow
+
+    public func getSectionIndex(sectionName: String) -> Int {
+        return currentResults.getSectionIndex(sectionName: sectionName)
+    }
+
+    public func getIndexPath(sectionName: String, row: Int) -> IndexPath {
+        let sectionIndex = currentResults.getSectionIndex(sectionName: sectionName)
+        return IndexPath(row: row, section: sectionIndex)
+    }
+
+    public func refreshRow(sectionName: String, row: Int) {
+        reloadRow?(getIndexPath(sectionName: sectionName, row: row))
+    }
 }
 
 extension NSFetchedResultsController {
@@ -182,5 +213,21 @@ extension NSFetchedResultsController {
             }
         }
         Log.fatal("Can't find section '\(sectionName)'")
+    }
+
+    @objc func getSectionIndex(sectionName: String) -> Int {
+        guard let sections = sections,
+            let index = sections.firstIndex(where: { $0.name == sectionName }) else {
+                Log.fatal("Can't find section named \(sectionName)")
+        }
+        return index
+    }
+
+    @objc func getSectionRowCount(sectionName: String) -> Int {
+        guard let sections = sections,
+            let section = sections.first(where: { $0.name == sectionName }) else {
+                Log.fatal("Can't find section named \(sectionName)")
+        }
+        return section.numberOfObjects
     }
 }
