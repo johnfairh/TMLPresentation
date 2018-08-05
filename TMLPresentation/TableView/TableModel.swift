@@ -54,7 +54,7 @@ public protocol TableModelDelegate: class {
     /// Actually do the move - implement one of these depending on whether you have sections
     func moveObject(_ modelObject: ModelType, fromRow: Int, toRow: Int)
     func moveObject(_ modelObject: ModelType,
-                    fromSection: SectionType, fromRowInSection: Int,
+                    fromRowInSection: Int,
                     toSection: SectionType, toRowInSection: Int)
     
     /// This next is ModelObject rather than ModelType because Swift does not permit
@@ -87,7 +87,7 @@ public extension TableModelDelegate {
     func canMoveObjectTo(_ modelObject: ModelType, toSection: SectionType, toRowInSection: Int) -> Bool { return true }
     func moveObject(_ from: ModelType, fromRow: Int, toRow: Int) {}
     func moveObject(_ modelObject: ModelType,
-                    fromSection: SectionType, fromRowInSection: Int,
+                    fromRowInSection: Int,
                     toSection: SectionType, toRowInSection: Int) {}
 
     func selectObject(_ modelObject: ModelObject) {}
@@ -299,13 +299,16 @@ public final class TableModel<CellType, DelegateType> : NSObject,
 
     // do the move - from datasource
     public func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        guard sourceIndexPath != destinationIndexPath else {
+            Log.log("Ignoring move, src == dest (\(sourceIndexPath))")
+            return
+        }
         if let delegate = delegate {
             let sourceObject = getModelObjectAtIndexPath(sourceIndexPath)
-            assert(!userMovingCells)
+            Log.assert(!userMovingCells)
             userMovingCells = true
             delegate.moveObject(sourceObject, fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
             delegate.moveObject(sourceObject,
-                                fromSection: getSectionAtIndexPath(sourceIndexPath),
                                 fromRowInSection: sourceIndexPath.row,
                                 toSection: getSectionAtIndexPath(destinationIndexPath),
                                 toRowInSection: destinationIndexPath.row)

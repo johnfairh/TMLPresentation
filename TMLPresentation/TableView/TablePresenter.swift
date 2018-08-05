@@ -141,13 +141,7 @@ extension TablePresenter {
         Log.log("MoveAndRenumber, \(fromRow) -> \(toRow)")
 
         let object = modelObjects.remove(at: fromRow)
-        let newToRow: Int
-        if toRow > fromRow {
-            newToRow = toRow - 1
-        } else {
-            newToRow = toRow
-        }
-        modelObjects.insert(object, at: newToRow)
+        modelObjects.insert(object, at: toRow)
 
         // get the list of indexes for reallocation
         var indexArray: [Int64] = []
@@ -174,26 +168,51 @@ extension TablePresenter {
     public func moveAndRenumber(fromSectionName: String, fromRowInSection: Int,
                                 toSectionName: String, toRowInSection: Int,
                                 sortOrder: ModelSortOrder) {
-        let fromSectionOffset = currentResults.getOverallSectionOffset(sectionName: fromSectionName)
-        let toSectionOffset = currentResults.getOverallSectionOffset(sectionName: toSectionName)
+        let fromSection = getSectionPosition(controller: currentResults, sectionName: fromSectionName)
+        let toSection = getSectionPosition(controller: currentResults, sectionName: toSectionName)
+
+        let fromSectionIdx = fromSection.index
+        let toSectionIdx = toSection.index
+
+        let fromSectionOffset = fromSection.rowOffset
+        let toSectionOffset = toSection.rowOffset
+
+        let fudge = (toSectionIdx > fromSectionIdx) ? -1 : 0
 
         moveAndRenumber(fromRow: fromSectionOffset + fromRowInSection,
-                        toRow: toSectionOffset + toRowInSection,
+                        toRow: toSectionOffset + toRowInSection + fudge,
                         sortOrder: sortOrder)
     }
 
+    private func getSectionPosition<T>(controller: NSFetchedResultsController<T>,
+                                       sectionName: String) -> (index: Int, rowOffset: Int, rows: Int) {
+        guard let sections = controller.sections else {
+            Log.fatal("Controller has no sections")
+        }
+        var rowOffset = 0, index = 0
+        for section in sections {
+            if section.name != sectionName {
+                rowOffset += section.numberOfObjects
+                index += 1
+            } else {
+                return (index: index, rowOffset: rowOffset, rows: section.numberOfObjects)
+            }
+        }
+        Log.fatal("Can't find section '\(sectionName)'")
+    }
+
     public func getSectionRowCount(sectionName: String) -> Int {
-        return currentResults.getSectionRowCount(sectionName: sectionName)
+        return getSectionPosition(controller: currentResults, sectionName: sectionName).rows
     }
 
     /// Helper to refresh a row in the UI - needed if the updates are masked from core data somehow
 
     public func getSectionIndex(sectionName: String) -> Int {
-        return currentResults.getSectionIndex(sectionName: sectionName)
+        return getSectionPosition(controller: currentResults, sectionName: sectionName).index
     }
 
     public func getIndexPath(sectionName: String, row: Int) -> IndexPath {
-        let sectionIndex = currentResults.getSectionIndex(sectionName: sectionName)
+        let sectionIndex = getSectionIndex(sectionName: sectionName)
         return IndexPath(row: row, section: sectionIndex)
     }
 
