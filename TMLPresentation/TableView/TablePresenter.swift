@@ -33,9 +33,6 @@ public protocol TablePresenterInterface {
     /// (output) Register a callback to update the view
     var reload: ((ModelResults) -> Void)? { get set }
 
-    /// (output) Register a callback to refresh one row of the view
-    var reloadRow: ((IndexPath) -> Void)? { get set }
-
     /// (output) should the view display associated chrome (segbar, +/edit buttons)
     var shouldEnableExtraControls: Bool { get }
 
@@ -99,9 +96,6 @@ open class TablePresenter<AppDirectorType> {
             refreshView()
         }
     }
-
-    /// Callback from view to reload a table row
-    public var reloadRow: ((IndexPath) -> Void)?
 
     /// Change the displayed query
     public var currentResultsName: String {
@@ -205,48 +199,7 @@ extension TablePresenter {
         return getSectionPosition(controller: currentResults, sectionName: sectionName).rows
     }
 
-    /// Helper to refresh a row in the UI - needed if the updates are masked from core data somehow
-
     public func getSectionIndex(sectionName: String) -> Int {
         return getSectionPosition(controller: currentResults, sectionName: sectionName).index
-    }
-
-    public func getIndexPath(sectionName: String, row: Int) -> IndexPath {
-        let sectionIndex = getSectionIndex(sectionName: sectionName)
-        return IndexPath(row: row, section: sectionIndex)
-    }
-
-    public func refreshRow(sectionName: String, row: Int) {
-        reloadRow?(getIndexPath(sectionName: sectionName, row: row))
-    }
-}
-
-extension NSFetchedResultsController {
-    @objc func getOverallSectionOffset(sectionName: String) -> Int {
-        var index = 0
-        for section in sections! {
-            if section.name != sectionName {
-                index += section.numberOfObjects
-            } else {
-                return index
-            }
-        }
-        Log.fatal("Can't find section '\(sectionName)'")
-    }
-
-    @objc func getSectionIndex(sectionName: String) -> Int {
-        guard let sections = sections,
-            let index = sections.firstIndex(where: { $0.name == sectionName }) else {
-                Log.fatal("Can't find section named \(sectionName)")
-        }
-        return index
-    }
-
-    @objc func getSectionRowCount(sectionName: String) -> Int {
-        guard let sections = sections,
-            let section = sections.first(where: { $0.name == sectionName }) else {
-                Log.fatal("Can't find section named \(sectionName)")
-        }
-        return section.numberOfObjects
     }
 }

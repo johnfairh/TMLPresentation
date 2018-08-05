@@ -112,6 +112,8 @@ public extension TableModelDelegate {
 public final class TableModel<CellType, DelegateType> : NSObject,
     UITableViewDataSource,
     UITableViewDelegate,
+    UITableViewDragDelegate,
+    UITableViewDropDelegate,
     NSFetchedResultsControllerDelegate where
     CellType: TableCell, CellType: UITableViewCell,
     DelegateType: TableModelDelegate,
@@ -140,6 +142,9 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         // Bind ...
         tableView?.dataSource = self
         tableView?.delegate = self
+        tableView?.dragDelegate = self
+        tableView?.dropDelegate = self
+        tableView?.dragInteractionEnabled = true
         fetchedResultsController.delegate = self
         
         // Go!
@@ -156,6 +161,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     deinit {
         tableView?.dataSource = nil
         tableView?.delegate = nil
+        tableView?.dragDelegate = nil
+        tableView?.dropDelegate = nil
         fetchedResultsController.delegate = nil
     }
     
@@ -313,9 +320,89 @@ public final class TableModel<CellType, DelegateType> : NSObject,
                                 toSection: getSectionAtIndexPath(destinationIndexPath),
                                 toRowInSection: destinationIndexPath.row)
             userMovingCells = false
+            if sourceIndexPath.section != destinationIndexPath.section {
+                Dispatch.toForeground {
+                    self.refreshCell(indexPath: destinationIndexPath)
+                }
+            }
         }
     }
-    
+
+    // MARK: - UITableViewDragDelegate
+
+    public func tableView(_ tableView: UITableView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        guard self.tableView(tableView, canMoveRowAt: indexPath) else {
+            return []
+        }
+
+        // Workaround.
+        //
+        // Use drag + drop to move the last row in a section causes the section itself to delete
+        // as part of the 'move' call.
+        //
+        // Option 1 - do the deleteSection() as part of the `move` stackframes.
+        //     This appears to work if the dest IndexPath is still valid after
+        //     the section has been deleted -- eg. 3 sections, move (0,0) -> (1,0).
+        //
+        //     BUT future drags do not work: `dropSessionDidUpdate` is never called.
+        //     AND if the deleted section causes the dest IndexPath NOT to be valid
+        //     (eg. move (0,0) -> (2,0)) then we get NSInternalInconsistencyException
+        //
+        // Option 2 - do the deleteSection() in a fibre break after the `move` stackframe.
+        //     This is the requirement for the "old way" of edit move / reorder control
+        //     which appears to work fine.
+        //
+        //     This crashes immediately the move is done (before the fibre can run) complaining
+        //     that there are three (for eg.) sections in the table UI but the data model
+        //     says there are only two.
+        //
+        // So, we forbid drag + drop from ever emptying a section.
+        //
+        // This doesn't actually stop the drag, good grief, but because we leave `localObject`
+        // `nil` we never accept the drop.  Lordy me.
+        guard let sections = fetchedResultsController.sections,
+            sections[indexPath.section].numberOfObjects > 1 else {
+                return []
+        }
+
+        let item = UIDragItem(itemProvider: NSItemProvider())
+        item.localObject = indexPath
+        return [item]
+    }
+
+    // let's not get other people involved in our mess...
+    public func tableView(_ tableView: UITableView, dragSessionIsRestrictedToDraggingApplication session: UIDragSession) -> Bool {
+        return true
+    }
+
+    // MARK: - UITableViewDropDelegate
+
+    public func tableView(_ tableView: UITableView, canHandle session: UIDropSession) -> Bool {
+        return true
+    }
+
+    public func tableView(_ tableView: UITableView,
+                          dropSessionDidUpdate session: UIDropSession,
+                          withDestinationIndexPath destinationIndexPath: IndexPath?) -> UITableViewDropProposal {
+
+        guard let destPath = destinationIndexPath,
+            let sourceItem = session.localDragSession?.items[0],
+            let sourcePath = sourceItem.localObject as? IndexPath,
+            destPath == self.tableView(tableView,
+                                       targetIndexPathForMoveFromRowAt: sourcePath,
+                                       toProposedIndexPath: destPath) else {
+                Log.log("Can't drop it here => forbidden")
+                return UITableViewDropProposal(operation: .forbidden)
+        }
+
+        return UITableViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+    }
+
+    public func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
+        // We never get here, more's the pity, because UITableView decides to invoke `moveRow`.
+        Log.log("** performDropWith!")
+    }
+
     // MARK: - NSFetchedResultsControllerDelegate
     
     // iOS 12 -- touch wood but all the NSFRC vs. sectionated UITableView issues appear to
