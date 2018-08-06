@@ -12,7 +12,6 @@ import CoreData
 /// for management of child models on top of an NSManagedObjectContext
 ///
 open class ModelServices: Model {
-    
     private let managedObjectModel:   NSManagedObjectModel
     private let managedObjectContext: NSManagedObjectContext
     private var parentModel:          ModelServices?
@@ -133,7 +132,7 @@ open class ModelServices: Model {
         
         return nextSortOrderValue
     }
-    
+
     // MARK: - Finding and counting
     
     /// Find an object by name
@@ -205,6 +204,23 @@ open class ModelServices: Model {
         return NSFetchedResultsController(fetchRequest: fetchReq,
                                           managedObjectContext: managedObjectContext,
                                           sectionNameKeyPath: sectionNameKeyPath,
+                                          cacheName: nil)
+    }
+
+    public func createFieldResults(entityName: String,
+                                predicate: NSPredicate?,
+                                sortedBy: [NSSortDescriptor],
+                                keyPath: String,
+                                unique: Bool) -> ModelFieldResults {
+        let fetchReq = NSFetchRequest<NSDictionary>(entityName: entityName)
+        fetchReq.predicate = predicate
+        fetchReq.sortDescriptors = sortedBy
+        fetchReq.resultType = .dictionaryResultType
+        fetchReq.propertiesToFetch = [keyPath]
+        fetchReq.returnsDistinctResults = unique
+        return NSFetchedResultsController(fetchRequest: fetchReq,
+                                          managedObjectContext: managedObjectContext,
+                                          sectionNameKeyPath: nil,
                                           cacheName: nil)
     }
     

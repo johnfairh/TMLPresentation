@@ -58,11 +58,19 @@ public protocol Model {
                               substitutionVariables vars: [String:AnyObject],
                               sectionNameKeyPath: String?) -> ModelResults
 
+
     /// Set up a live query ready to run, using a given predicate
     func createFetchedResults(entityName: String,
                               predicate: NSPredicate?,
                               sortedBy: [NSSortDescriptor],
                               sectionNameKeyPath: String?) -> ModelResults
+
+    /// Set up a live query of fields of an entity
+    func createFieldResults(entityName: String,
+                            predicate: NSPredicate?,
+                            sortedBy: [NSSortDescriptor],
+                            keyPath: String,
+                            unique: Bool) -> ModelFieldResults
 
     /// Clone a fetched-results-controller but with a different predicate
     func cloneResults(_ results: ModelResults, withPredicate predicate: NSPredicate) -> ModelResults

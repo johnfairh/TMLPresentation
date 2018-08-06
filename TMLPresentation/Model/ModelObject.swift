@@ -126,7 +126,20 @@ extension ModelObject where Self: NSManagedObject {
     public static func createAllResultsSet(model: Model) -> ModelResultsSet {
         return createAllResults(model: model).asModelResultsSet
     }
-    
+
+    /// Set up a live query of fields using a given predicate
+    public static func createFieldResults(model: Model,
+                                          predicate: NSPredicate? = nil,
+                                          sortedBy: [NSSortDescriptor] = [defaultSortDescriptor],
+                                          keyPath: String,
+                                          unique: Bool) -> ModelFieldResults {
+        return model.createFieldResults(entityName: entityName,
+                                     predicate: predicate,
+                                     sortedBy: sortedBy,
+                                     keyPath: keyPath,
+                                     unique: unique)
+    }
+
     // MARK: - Sort Orders
     
     public func getSortOrder(_ sortOrder: ModelSortOrder) -> Int64 {
