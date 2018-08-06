@@ -71,3 +71,50 @@ extension UIViewController {
         present(alertController, animated: false, completion: nil)
     }
 }
+
+extension UITextField {
+    /// Attempt to autocomplete some new typing in a `UITextField`
+    ///
+    /// Call from the `shouldChangeCharactersInRange` delegate method.
+    /// - returns: `true` if autocomplete happened and the text field
+    ///     has been updated.  `false` if no autcomplete, let iOS normal
+    ///     behaviour happen.
+    ///
+    /// Credit Greg Brown.
+    public func autoCompleteText(newText: String, suggestions: [String]) -> Bool {
+        guard !newText.isEmpty,                         // typed something
+            let selectedTextRange = selectedTextRange,  // have cursor
+            selectedTextRange.end == endOfDocument,     // cursor at end of text
+            let prefixRange = textRange(from: beginningOfDocument, to: selectedTextRange.start),
+                                                        // world not broken #1
+            let preText = text(in: prefixRange) else {  // world not broken #2
+                // Not a normal typing situation, bail
+                return false
+        }
+
+        let prefix = preText + newText // existing in box + just-typed stuff
+        let matches = suggestions.filter { $0.hasPrefix(prefix) }
+
+        guard matches.count > 0 else {
+            // No match, let the new typing in
+            return false
+        }
+
+        // Update text & attempt to update selection to what we autocompleted
+        text = matches[0]
+        if let start = position(from: beginningOfDocument, offset: prefix.count) {
+            self.selectedTextRange = textRange(from: start, to: endOfDocument)
+        }
+        return true
+    }
+}
+
+// Nasty hack to retrieve the `UITextField` from a `UISearchBar` ...
+extension UISearchBar {
+    public var textField: UITextField {
+        guard let field = self.value(forKey: "_searchField") as? UITextField else {
+            Log.fatal("Undocumented assumption invalidated, ha-ha")
+        }
+        return field
+    }
+}
