@@ -47,7 +47,10 @@ final class TableFilterView: UIView {
 /// Cares about view stuff -- filter bar, picker, create button.
 /// Cares about queries.
 
-open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> : PresentableBasicTableVC<PresenterViewInterface> {
+open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
+    PresentableBasicTableVC<PresenterViewInterface>,
+    UISearchResultsUpdating,
+    UISearchBarDelegate {
 
     private var tableFilterView: TableFilterView?
 
@@ -137,5 +140,58 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     public func clearFilter() {
         tableView.tableHeaderView = nil
         presenter.filteredResults = nil
+    }
+
+    // MARK: - Search
+
+    /// Call during `viewDidLoad` to enable a search controller.
+    /// `updateTableForSearch` is called when anything changes in the searchbar.
+    public func enableSearch(scopes: [String]) {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.scopeButtonTitles = scopes
+        searchController.searchBar.selectedScopeButtonIndex = -1
+        searchController.searchBar.showsScopeBar = scopes.count > 0
+        searchController.searchBar.delegate = self
+        searchController.searchResultsUpdater = self
+        navigationItem.searchController = searchController
+        definesPresentationContext = true
+    }
+
+    // With the scope bar active, if there is a button selected then it looks really
+    // weird when it slides under the translucent menu bar.  So we intercept this
+    // and deselect the buttons when the search bar is not in use.  Weird.
+
+    public func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        if searchBar.selectedScopeButtonIndex == -1 {
+            searchBar.selectedScopeButtonIndex = 0
+        }
+    }
+
+    public func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.selectedScopeButtonIndex = -1
+    }
+
+    /// Refresh the search when the scope changes
+    public func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        Dispatch.toForeground {
+            self.updateSearchResults(for: self.navigationItem.searchController!)
+        }
+    }
+
+    /// Pull out the essentials and call out to subclass
+    public func updateSearchResults(for searchController: UISearchController) {
+        let searchBar = searchController.searchBar
+        let text = searchBar.text ?? ""
+        updateTableForSearch(text: text, scopeIndex: searchBar.selectedScopeButtonIndex)
+    }
+
+    open func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        return true
+    }
+
+    /// Override to implement a search
+    open func updateTableForSearch(text: String, scopeIndex: Int) {
     }
 }

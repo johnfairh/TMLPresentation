@@ -116,6 +116,60 @@ open class TablePresenter<AppDirectorType> {
             refreshView()
         }
     }
+
+    // MARK: Search support -- delay DB query until typing stops
+    enum SearchDelayState {
+        case idle
+        case delaying
+        case delaying_again
+    }
+
+    public typealias TablePresenterSearchHandler = (String, Int) -> ModelResultsSet?
+
+    private var searchDelayState: SearchDelayState = .idle
+    private var searchText = ""
+    private var searchType = 0
+    private var searchHandler: TablePresenterSearchHandler?
+
+    /// Call from presenter to respond to a search request
+    public func handleSearchUpdate(text: String, type: Int, handler: @escaping TablePresenterSearchHandler) {
+        if text.isEmpty {
+            searchDelayState = .idle
+            if filteredResults != nil {
+                filteredResults = nil
+            }
+        } else {
+            searchText = text
+            searchType = type
+            searchHandler = handler
+
+            switch searchDelayState {
+            case .idle:
+                delaySearch()
+            case .delaying:
+                searchDelayState = .delaying_again
+            case .delaying_again:
+                break
+            }
+        }
+    }
+
+    func delaySearch() {
+        searchDelayState = .delaying
+        Dispatch.toForegroundAfter(milliseconds: 150, block: updateSearchResultsDelayed)
+    }
+
+    func updateSearchResultsDelayed() {
+        switch searchDelayState {
+        case .idle:
+            break
+        case .delaying_again:
+            delaySearch()
+        case .delaying:
+            searchDelayState = .idle
+            filteredResults = searchHandler!(searchText, searchType)
+        }
+    }
 }
 
 // MARK: Moving objects
