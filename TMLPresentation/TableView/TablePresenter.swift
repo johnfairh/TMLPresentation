@@ -20,6 +20,7 @@
 /// * Tables can operate in different modes to satisfy different use cases.
 ///     * If `shouldEnableExtraControls` then the view may enable a query-picker
 ///       bar, edit-mode, and create-new-object controls.
+/// * Tables may be searchable, we offer support to deglitch typing.
 ///
 /// Works with `PresentableTableVC` on the UI side.
 ///
@@ -118,6 +119,7 @@ open class TablePresenter<AppDirectorType> {
     }
 
     // MARK: Search support -- delay DB query until typing stops
+
     enum SearchDelayState {
         case idle
         case delaying
@@ -183,10 +185,10 @@ extension TablePresenter {
     /// This version works on the global objects list.
     public func moveAndRenumber(fromRow: Int, toRow: Int, sortOrder: ModelSortOrder) {
         guard var modelObjects = currentResults.fetchedObjects as? [ModelObject] else {
-            fatalError("Confused somewhere, maybe before viewDidLoad()?")
+            Log.fatal("Confused somewhere, maybe before viewDidLoad()?")
         }
 
-        Log.log("MoveAndRenumber, \(fromRow) -> \(toRow)")
+        Log.tableLog("MoveAndRenumber, \(fromRow) -> \(toRow)")
 
         let object = modelObjects.remove(at: fromRow)
         modelObjects.insert(object, at: toRow)

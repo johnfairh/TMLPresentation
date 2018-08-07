@@ -44,7 +44,7 @@ final class TableFilterView: UIView {
 }
 
 /// Featureful tableview class.
-/// Cares about view stuff -- filter bar, picker, create button.
+/// Cares about view stuff -- filter bar, picker, create button, search controller
 /// Cares about queries.
 
 open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :

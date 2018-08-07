@@ -135,7 +135,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     CellType.ModelType == DelegateType.ModelType
 {
     public typealias ModelType = CellType.ModelType
-    
+
     private weak var tableView: UITableView?
     private      var fetchedResultsController: ModelResults
     private weak var delegate: DelegateType?
@@ -165,7 +165,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             try fetchedResultsController.performFetch()
             tableView?.reloadData()
         } catch {
-            Log.log("** Core Data fetch failed - \(error) - pressing on")
+            Log.log("Core Data fetch failed - \(error) - pressing on")
         }
     }
     
@@ -183,14 +183,14 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     
     private func getModelObjectAtIndexPath(_ indexPath: IndexPath) -> ModelType {
         guard let modelObject = fetchedResultsController.object(at: indexPath) as? ModelType else {
-            fatalError("Can't get expected modeltype")
+            Log.fatal("Can't get expected modeltype")
         }
         return modelObject
     }
     
     private func getCellAtIndexPath(_ indexPath: IndexPath) -> CellType {
         guard let cell = tableView?.cellForRow(at: indexPath) as? CellType else {
-            fatalError("Missing Cell for indexPath \(indexPath)")
+            Log.fatal("Missing Cell for indexPath \(indexPath)")
         }
         return cell
     }
@@ -202,20 +202,14 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         return delegate.getSectionObject(name: sections[indexPath.section].name)
     }
     
-    // MARK: - UITableViewDelegate
-    
-    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        delegate?.selectObject(getModelObjectAtIndexPath(indexPath))
-    }
-    
-    // MARK: - UITableViewDataSource
+    // MARK: - Table Structure
     
     public func numberOfSections(in tableView: UITableView) -> Int {
         var sectionCount = 0
         if let sections = fetchedResultsController.sections {
             sectionCount = sections.count
         }
-        Log.debugLog("*** numberOfSection = \(sectionCount)")
+        Log.tableLog("numberOfSections = \(sectionCount)")
         return sectionCount
     }
     
@@ -224,7 +218,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         if let sections = fetchedResultsController.sections {
             rows = sections[section].numberOfObjects
         }
-        Log.debugLog("*** numberOfRowsInSection \(section) = \(rows)")
+        Log.tableLog("numberOfRowsInSection \(section) = \(rows)")
         return rows
     }
     
@@ -247,7 +241,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         let identifier = String(describing: cellClass!)
         
         guard let cell = tableView.dequeueReusableCell(withIdentifier: identifier) as? CellType else {
-            fatalError("Can't dequeue cell with id \(identifier)")
+            Log.fatal("Can't dequeue cell with id \(identifier)")
         }
         
         cell.configure(modelObject)
@@ -260,6 +254,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         let cell = getCellAtIndexPath(indexPath)
         cell.configure(modelObject)
     }
+
+    // MARK: - Edit/Delete
 
     public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         guard let delegate = delegate else {
@@ -279,6 +275,24 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         return delegate?.canDeleteObject(getModelObjectAtIndexPath(indexPath)) ?? false
     }
 
+    public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        guard editingStyle == .delete else {
+            Log.fatal("Unexpected editing style")
+        }
+
+        if let delegate = delegate {
+            let modelObject = getModelObjectAtIndexPath(indexPath)
+            Log.assert(delegate.canDeleteObject(modelObject))
+            delegate.deleteObject(modelObject)
+        }
+    }
+
+    // MARK: - Row Actions
+
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        delegate?.selectObject(getModelObjectAtIndexPath(indexPath))
+    }
+
     public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         guard let action = delegate?.leadingSwipeActionsForObject(getModelObjectAtIndexPath(indexPath)) else {
             return nil
@@ -292,19 +306,9 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         }
         return UISwipeActionsConfiguration(actions: [uiAction])
     }
-    
-    public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        guard editingStyle == .delete else {
-            fatalError("Unexpected editing style")
-        }
 
-        if let delegate = delegate {
-            let modelObject = getModelObjectAtIndexPath(indexPath)
-            assert(delegate.canDeleteObject(modelObject))
-            delegate.deleteObject(modelObject)
-        }
-    }
-    
+    // MARK: - Move
+
     // police move source - from datasource
     public func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
         return delegate?.canMoveObject(getModelObjectAtIndexPath(indexPath)) ?? false
@@ -319,18 +323,14 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         let moveOK = delegate?.canMoveObjectTo(object,
                                                toSection: proposedSection,
                                                toRowInSection: proposedDestinationIndexPath.row) ?? true
-        Log.log("*** canMove: \(moveOK)")
-        if moveOK {
-            return proposedDestinationIndexPath
-        } else {
-            return sourceIndexPath
-        }
+
+        return moveOK ? proposedDestinationIndexPath : sourceIndexPath
     }
 
     // do the move - from datasource
     public func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         guard sourceIndexPath != destinationIndexPath else {
-            Log.log("Ignoring move, src == dest (\(sourceIndexPath))")
+            Log.tableLog("Ignoring move, src == dest (\(sourceIndexPath))")
             return
         }
         if let delegate = delegate {
@@ -414,7 +414,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             destPath == self.tableView(tableView,
                                        targetIndexPathForMoveFromRowAt: sourcePath,
                                        toProposedIndexPath: destPath) else {
-                Log.log("Can't drop it here => forbidden")
+                Log.tableLog("Can't drop it here => forbidden")
                 return UITableViewDropProposal(operation: .forbidden)
         }
 
@@ -423,7 +423,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
 
     public func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
         // We never get here, more's the pity, because UITableView decides to invoke `moveRow`.
-        Log.log("** performDropWith!")
+        Log.fatal("performDropWith() -- what to do?")
     }
 
     // MARK: - NSFetchedResultsControllerDelegate
@@ -432,7 +432,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     // be fixed!  All workarounds removed now.
     //
     public func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        Log.debugLog("*** TableModel.controllerWillChangeContent - userMovingCells = \(userMovingCells)")
+        Log.tableLog("FRCD - .controllerWillChangeContent - userMovingCells = \(userMovingCells)")
         if !userMovingCells {
             tableView?.beginUpdates()
         }
@@ -444,17 +444,17 @@ public final class TableModel<CellType, DelegateType> : NSObject,
                            for type: NSFetchedResultsChangeType) {
         switch type {
         case .insert:
-            Log.debugLog("**** TableModel.section(insert) \(sectionIndex)")
+            Log.tableLog("FRCD - .section(insert) \(sectionIndex)")
             if !userMovingCells {
                 tableView?.insertSections(IndexSet(integer: sectionIndex), with: .fade)
             }
         case .delete:
-            Log.debugLog("**** TableModel.section(delete) \(sectionIndex)")
+            Log.tableLog("FRCD - .section(delete) \(sectionIndex)")
             if !userMovingCells {
                 tableView?.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
             }
         default:
-            Log.fatal("TableModel.section(??) Not sure what to do with \(type.rawValue)")
+            Log.fatal("FRCD - .section(??) Not sure what to do with \(type.rawValue)")
         }
     }
     
@@ -463,16 +463,16 @@ public final class TableModel<CellType, DelegateType> : NSObject,
                     at indexPath: IndexPath?,
                     for type: NSFetchedResultsChangeType,
                     newIndexPath: IndexPath?) {
-        // Debug tracing, woe is me
+        // Debug tracing...
         switch type {
         case .delete:
-            Log.debugLog("**** TableModel.row(delete) \(indexPath!)")
+            Log.tableLog("FRCD - .row(delete) \(indexPath!)")
         case .move:
-            Log.debugLog("**** TableModel.row(move) \(indexPath!) to \(newIndexPath!)")
+            Log.tableLog("FRCD - .row(move) \(indexPath!) to \(newIndexPath!)")
         case .update:
-            Log.debugLog("**** TableModel.row(update) \(indexPath!)")
+            Log.tableLog("FRCD - .row(update) \(indexPath!)")
         case .insert:
-            Log.debugLog("**** TableModel.row(insert) \(newIndexPath!)")
+            Log.tableLog("FRCD - .row(insert) \(newIndexPath!)")
         }
 
         // Bail immediately if the events are driven by user direct manipulation, in which
@@ -480,7 +480,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         // look ugly or wrong.
         //
         guard !userMovingCells else {
-            Log.debugLog("*** Bail: userMovingCells")
+            Log.tableLog("FRCD - bail - userMovingCells")
             return
         }
         
@@ -505,7 +505,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     }
     
     public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        Log.debugLog("*** TableModel.controllerDidChangeContent - userMovingCells = \(userMovingCells)")
+        Log.tableLog("FRCD - .controllerDidChangeContent - userMovingCells = \(userMovingCells)")
         if !userMovingCells {
             tableView?.endUpdates()
         }

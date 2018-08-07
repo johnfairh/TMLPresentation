@@ -21,6 +21,8 @@ import os
 public enum Log {
     public static var enableDebugLogs = false
 
+    public static var enableTableLogs = false
+
     public static var crashWhenPossible = false
 
     private static func logWithOsLog(message: String) {
@@ -43,6 +45,12 @@ public enum Log {
     public static func debugLog(_ message: String) {
         if enableDebugLogs {
             Log.log(message)
+        }
+    }
+
+    public static func tableLog(_ message: String) {
+        if enableTableLogs {
+            Log.log("TBL: \(message)")
         }
     }
 
