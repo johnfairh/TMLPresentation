@@ -34,6 +34,19 @@ public protocol TableCell {
     func configure(_ modelObject: ModelType)
 }
 
+/// Structure to describe a leading-edge swipe action
+public struct TableSwipeAction {
+    public let text: String
+    public let colorName: String?
+    public let action: () -> Void
+
+    public init(text: String, colorName: String? = nil, action: @escaping () -> Void) {
+        self.text = text
+        self.colorName = colorName
+        self.action = action
+    }
+}
+
 // MARK: - TableModelDelegate
 
 ///
@@ -71,7 +84,7 @@ public protocol TableModelDelegate: class {
     func objectsChanged()
 
     /// Leading swipe actions
-    func leadingSwipeActionsForObject(_ modelObject: ModelType) -> UISwipeActionsConfiguration?
+    func leadingSwipeActionsForObject(_ modelObject: ModelType) -> TableSwipeAction?
 
     /// Sections decoding
     func getSectionTitle(name: String) -> String
@@ -93,7 +106,7 @@ public extension TableModelDelegate {
     func selectObject(_ modelObject: ModelObject) {}
     func cellClassForObject(_ modelObject: ModelType) -> AnyClass? { return nil }
     func objectsChanged() {}
-    func leadingSwipeActionsForObject(_ modelObject: ModelType) -> UISwipeActionsConfiguration? { return nil }
+    func leadingSwipeActionsForObject(_ modelObject: ModelType) -> TableSwipeAction? { return nil }
     func getSectionTitle(name: String) -> String { return name }
     func getSectionObject(name: String) -> String { return name }
 }
@@ -267,7 +280,17 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     }
 
     public func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        return delegate?.leadingSwipeActionsForObject(getModelObjectAtIndexPath(indexPath))
+        guard let action = delegate?.leadingSwipeActionsForObject(getModelObjectAtIndexPath(indexPath)) else {
+            return nil
+        }
+        let uiAction = UIContextualAction(style: .normal, title: action.text) { _, _, continuation in
+            action.action()
+            continuation(true)
+        }
+        if let colorName = action.colorName {
+            uiAction.backgroundColor = UIColor(named: colorName) ?? .green
+        }
+        return UISwipeActionsConfiguration(actions: [uiAction])
     }
     
     public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
