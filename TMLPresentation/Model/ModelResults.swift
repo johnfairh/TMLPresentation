@@ -48,8 +48,19 @@ public struct ModelFieldResultsDecoder {
 
     /// Create an instance.
     /// Caller is responsible for creating and issuing fetches on the FRC.
+    /// FRC doesn't support field queries + change tracking, caller must manually
+    /// call `refresh`.
     public init(results: ModelFieldResults) {
         self.results = results
+    }
+
+    /// Query the DB and refresh the field list.  Errors are swallowed.
+    public func refresh() {
+        do {
+            try results.performFetch()
+        } catch {
+            Log.log("Field results fetch failed: \(error) - pressing on")
+        }
     }
 
     private var fields: [Any] {
