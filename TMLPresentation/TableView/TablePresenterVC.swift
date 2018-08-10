@@ -79,9 +79,10 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     // provide a method that subclasses can override to do what they want on a press.
     private func initAddBarButton() {
         if presenter.shouldEnableExtraControls {
-            if let addBarButton = navigationItem.rightBarButtonItem {
-                // We are in manage presentation mode + we have a right-nav button that
-                // we assume is an 'add' button.  Hook it up.
+            if let addBarButton = navigationItem.rightBarButtonItem,
+                addBarButton.target == nil {
+                // We are in manage presentation mode + we have an unadopted right-nav button
+                // that we assume is an 'add' button.  Hook it up.
                 addBarButton.target = self
                 addBarButton.action = #selector(self.addBarButtonPressed)
             }
