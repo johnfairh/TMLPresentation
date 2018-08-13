@@ -24,7 +24,13 @@ extension UIImage {
               NSAttributedString.Key.foregroundColor: UIColor.white ]
 
         let textSize = nsString.size(withAttributes: attrs)
-        let stringPoint = CGPoint(x: size.width-textSize.width-1, y: size.height-textSize.height+3)
+        var xOffset = 1, yOffset = 3
+        if size.width > 60 {
+            xOffset = 3
+            yOffset = 0
+        }
+        let stringPoint = CGPoint(x: size.width-textSize.width-CGFloat(xOffset),
+                                  y: size.height-textSize.height+CGFloat(yOffset))
 
         // seem to have to draw this twice, can't do both outline + fill??
         nsString.draw(at: stringPoint, withAttributes: attrs)
@@ -46,7 +52,7 @@ extension UIImage {
         nsString.draw(at: CGPoint(x: 0, y: -3), withAttributes: attrs)
     }
 
-    public func imageWithTextBadge(_ text: String, fav: Bool = false) -> UIImage {
+    public func imageWithTextBadge(_ text: String?, fav: Bool = false) -> UIImage {
         return imageWithSize(size, andBadge: text, fav: fav)
     }
 
@@ -73,10 +79,12 @@ extension UIImage {
 
 /// Prettify icon views
 extension UIImageView {
-    public func enableIconBorder() {
+    public func enableRoundCorners(width: Int? = nil) {
         layer.cornerRadius  = 6
         layer.masksToBounds = true
-        layer.borderWidth   = 1
+        if let width = width {
+            layer.borderWidth = CGFloat(width)
+        }
     }
 }
 
