@@ -152,26 +152,22 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.scopeButtonTitles = scopes
-        searchController.searchBar.selectedScopeButtonIndex = -1
-        searchController.searchBar.showsScopeBar = scopes.count > 0
+
+        // VERY IMPORTANT TO NOT SET `showsScopeBar`
+        //
+        // The system figures it out from `scopeButtonTitles`.
+        // If you set it manually then the scope bar shows up at weird
+        // times including during animated push-pop-VC transitions.
+        //
+        // It's like this field means "show the scope bar at inconvenient
+        // times as well as when it should be shown".
+        //
+        // searchController.searchBar.showsScopeBar = scopes.count > 0
+        //
         searchController.searchBar.delegate = self
         searchController.searchResultsUpdater = self
         navigationItem.searchController = searchController
         definesPresentationContext = true
-    }
-
-    // With the scope bar active, if there is a button selected then it looks really
-    // weird when it slides under the translucent menu bar.  So we intercept this
-    // and deselect the buttons when the search bar is not in use.  Weird.
-
-    public func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        if searchBar.selectedScopeButtonIndex == -1 {
-            searchBar.selectedScopeButtonIndex = 0
-        }
-    }
-
-    public func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.selectedScopeButtonIndex = -1
     }
 
     /// Refresh the search when the scope changes
