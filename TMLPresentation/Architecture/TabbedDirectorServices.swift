@@ -8,11 +8,30 @@
 import Foundation
 import UIKit
 
+class TransitioningObject: NSObject, UIViewControllerAnimatedTransitioning {
+
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        let fromView: UIView = transitionContext.view(forKey: UITransitionContextViewKey.from)!
+        let toView: UIView = transitionContext.view(forKey: UITransitionContextViewKey.to)!
+
+        transitionContext.containerView.addSubview(fromView)
+        transitionContext.containerView.addSubview(toView)
+
+        UIView.transition(from: fromView, to: toView, duration: transitionDuration(using: transitionContext), options: UIView.AnimationOptions.transitionCurlUp) { finished in
+            transitionContext.completeTransition(true)
+        }
+    }
+
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return 0.25
+    }
+}
+
 ///
 /// TabbedDirectorServices -- use for managing a UI based in a tab controller
 /// with each tab having a nav controller.
 ///
-open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirectorType> {
+open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirectorType>, UITabBarControllerDelegate {
     private var tabBarViewController: UITabBarController!
     
     /// Provide app director instance, the window to put view controllers in, and the name of the tab VC
@@ -23,8 +42,16 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
             Log.fatal("VC \(tabBarVcName) is not a UITabBarController")
         }
         self.tabBarViewController = controller
+        controller.delegate = self
     }
-    
+
+    public func tabBarController(_ tabBarController: UITabBarController,
+                          animationControllerForTransitionFrom fromVC: UIViewController,
+                          to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        // tbd return TransitioningObject()
+        return nil
+    }
+
     /// During initialization, before 'presentUI', configure a tab's VC with a presenter.
     ///
     /// The tab's VC may be wrapped in a nav controller - this is skipped.
