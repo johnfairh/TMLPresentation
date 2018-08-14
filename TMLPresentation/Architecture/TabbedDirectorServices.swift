@@ -25,21 +25,36 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
         self.tabBarViewController = controller
     }
     
-    /// During initialization, before 'presentUI', configure the default action for selecting
-    /// table rows.
+    /// During initialization, before 'presentUI', configure a tab's VC with a presenter.
+    ///
+    /// The tab's VC may be wrapped in a nav controller - this is skipped.
+    ///
+    /// The tab is assumed to be managing some kind of live object or more usually a set
+    /// of live objects.  These are expressed by the `queryResults` which is a bunch of
+    /// DB queries.  In the case of a singular object this query will produce just the one
+    /// object -- but we still pass the query here, not the object, to avoid having to fetch/
+    /// create/handle errors up front.
     public func initTab<ModelObjectType, PresenterType>(tabIndex: Int,
                                                         rootModel: Model,
                                                         queryResults: ModelResultsSet,
                                                         presenterFn: MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType>,
-                                                        picked: @escaping PresenterDone<ModelObjectType>)
-        where ModelObjectType: ModelObject,PresenterType: Presenter {
-        guard let navController = tabBarViewController.viewControllers?[tabIndex] as? UINavigationController else {
-            Log.fatal("Tab \(tabIndex) missing or not a UINavigationController")
+                                                        picked: @escaping PresenterDone<ModelObjectType> = { _ in })
+    where ModelObjectType: ModelObject, PresenterType: Presenter {
+
+        guard let vcInTab = tabBarViewController.viewControllers?[tabIndex] else {
+            Log.fatal("Tab \(tabIndex) missing")
+        }
+
+        let targetVC: UIViewController
+        if let navController = vcInTab as? UINavigationController {
+            targetVC = navController.viewControllers[0]
+        } else {
+            targetVC = vcInTab
         }
 
         let presenter = presenterFn(director, rootModel, queryResults, .multi(.manage), picked)
 
-        PresenterUI.bind(viewController: navController.viewControllers[0], presenter: presenter)
+        PresenterUI.bind(viewController: targetVC, presenter: presenter)
     }
     
     /// Call when the model layer is all ready to go, enables the UI
