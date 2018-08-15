@@ -66,7 +66,10 @@ public protocol Model {
                               sectionNameKeyPath: String?) -> ModelResults
 
     /// Run a fetch for field data
-    func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> [[String : AnyObject]]
+    func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> ModelFieldResults
+
+    /// Set up a live object that notifies when the fields change
+    func createFieldWatcher(fetchRequest: ModelFieldFetchRequest) -> ModelFieldWatcher
 
     /// Clone a fetched-results-controller but with a different predicate
     func cloneResults(_ results: ModelResults, withPredicate predicate: NSPredicate) -> ModelResults
@@ -80,10 +83,13 @@ public protocol Model {
     func saveAndWait()
     
     /// Obtain a temporary child model workspace
-    func createChildModel() -> Model
+    func createChildModel(background: Bool) -> Model
 
-    // MARK: - Until we have a better way of doing notifications
-    var managedObjectContext: NSManagedObjectContext { get }
+    /// Run code asynchronously on the Model's queue
+    func perform(action: @escaping (Model) -> Void)
+
+    // MARK: - Notifications
+    func createListener(name: NSNotification.Name, callback: @escaping NotificationListener.Callback) -> NotificationListener
 }
 
 ///
@@ -107,5 +113,9 @@ extension Model {
     
     public func save() {
         save {}
+    }
+
+    public func createChildModel() -> Model {
+        return createChildModel(background: false)
     }
 }

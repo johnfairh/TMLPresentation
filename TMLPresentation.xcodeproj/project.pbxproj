@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		020825F421246ECC007578C7 /* ModelFieldWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020825F321246ECB007578C7 /* ModelFieldWatcher.swift */; };
 		02130A07210E0A8100410451 /* CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02130A06210E0A8100410451 /* CoreDataHelpers.swift */; };
 		02867EB9211F5D93004D3122 /* URLFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02867EB8211F5D93004D3122 /* URLFetcher.swift */; };
 		028F3D802105F5210010C41B /* TMLPresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = 028F3D7E2105F5210010C41B /* TMLPresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -32,6 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		020825F321246ECB007578C7 /* ModelFieldWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFieldWatcher.swift; sourceTree = "<group>"; };
 		02130A06210E0A8100410451 /* CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataHelpers.swift; sourceTree = "<group>"; };
 		02867EB8211F5D93004D3122 /* URLFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLFetcher.swift; sourceTree = "<group>"; };
 		028F3D7B2105F5210010C41B /* TMLPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TMLPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -128,6 +130,7 @@
 				028F3D912105F5530010C41B /* ModelObject.swift */,
 				028F3D922105F5530010C41B /* ModelProvider.swift */,
 				028F3D932105F5530010C41B /* ModelResults.swift */,
+				020825F321246ECB007578C7 /* ModelFieldWatcher.swift */,
 				028F3D942105F5530010C41B /* ModelServices.swift */,
 			);
 			path = Model;
@@ -234,6 +237,7 @@
 				028F3D9F2105F5530010C41B /* DirectorServices.swift in Sources */,
 				028F3D9D2105F5530010C41B /* TablePresenter.swift in Sources */,
 				028F3DA42105F5530010C41B /* ModelObject.swift in Sources */,
+				020825F421246ECC007578C7 /* ModelFieldWatcher.swift in Sources */,
 				028F3D9E2105F5530010C41B /* TablePresenterVC.swift in Sources */,
 				028F3DAC2105F5530010C41B /* UIKitArtHelpers.swift in Sources */,
 				028F3DA52105F5530010C41B /* ModelProvider.swift in Sources */,

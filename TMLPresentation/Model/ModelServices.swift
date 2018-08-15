@@ -24,8 +24,8 @@ open class ModelServices: Model {
         self.parentModel          = nil
     }
     
-    private convenience init(parentModel: ModelServices) {
-        let newMoc = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+    private convenience init(parentModel: ModelServices, background: Bool) {
+        let newMoc = NSManagedObjectContext(concurrencyType: background ? .privateQueueConcurrencyType : .mainQueueConcurrencyType)
         newMoc.parent = parentModel.managedObjectContext
         
         self.init(managedObjectModel: parentModel.managedObjectModel, managedObjectContext: newMoc)
@@ -72,7 +72,7 @@ open class ModelServices: Model {
     }
 
     /// Helper to issue a fetch request for fields
-    public func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> [[String : AnyObject]] {
+    public func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> ModelFieldResults {
         do {
             let rawResults = try managedObjectContext.fetch(fetchRequest)
             guard let fieldResults = rawResults as? [[String : AnyObject]] else {
@@ -83,6 +83,10 @@ open class ModelServices: Model {
             Log.log("Model fetchReq failed: \(error) - returning no results found")
         }
         return []
+    }
+
+    public func createFieldWatcher(fetchRequest: ModelFieldFetchRequest) -> ModelFieldWatcher {
+        return ModelFieldWatcher(baseModel: self, fetchRequest: fetchRequest)
     }
     
     // MARK: - Simple object routines
@@ -297,7 +301,6 @@ open class ModelServices: Model {
         }
     }
     
-    
     /// Request a save of changes to the database.  Executes asynchronously, client can care or not.
     public func save(_ done: @escaping ()->() = {}) {
         doSave(asCallbackTo: managedObjectContext.perform, done: done)
@@ -308,9 +311,24 @@ open class ModelServices: Model {
         Log.assert(isRoot, message: "Only OK for root context")
         doSave(asCallbackTo: managedObjectContext.performAndWait, done: {})
     }
+
+    // MARK: Misc
     
     /// Obtain a temporary child model workspace
-    public func createChildModel() -> Model {
-        return ModelServices(parentModel: self)
+    public func createChildModel(background: Bool) -> Model {
+        return ModelServices(parentModel: self, background: background)
+    }
+
+    /// Run something on the model's queue
+    public func perform(action: @escaping (Model) -> Void) {
+        managedObjectContext.perform {
+            action(self)
+        }
+    }
+
+    /// Create a notification listener, set up in listening state.
+    public func createListener(name: NSNotification.Name,
+                               callback: @escaping NotificationListener.Callback) -> NotificationListener {
+        return NotificationListener(name: name, from: managedObjectContext, callback: callback)
     }
 }
