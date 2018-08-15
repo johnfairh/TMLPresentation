@@ -13,7 +13,7 @@ import CoreData
 ///
 open class ModelServices: Model {
     private let managedObjectModel:   NSManagedObjectModel
-    private let managedObjectContext: NSManagedObjectContext
+    public  let managedObjectContext: NSManagedObjectContext
     private var parentModel:          ModelServices?
     
     private var isRoot: Bool { return parentModel == nil }
@@ -69,6 +69,20 @@ open class ModelServices: Model {
             Log.log("**** Model: Fetch request for 'any' \(fetchReq.entityName!)' failed, \(error)")
         }
         return result
+    }
+
+    /// Helper to issue a fetch request for fields
+    public func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> [[String : AnyObject]] {
+        do {
+            let rawResults = try managedObjectContext.fetch(fetchRequest)
+            guard let fieldResults = rawResults as? [[String : AnyObject]] else {
+                Log.fatal("Bad type coming back from core data - \(rawResults)")
+            }
+            return fieldResults
+        } catch {
+            Log.log("Model fetchReq failed: \(error) - returning no results found")
+        }
+        return []
     }
     
     // MARK: - Simple object routines
@@ -207,23 +221,6 @@ open class ModelServices: Model {
                                           cacheName: nil)
     }
 
-    public func createFieldResults(entityName: String,
-                                predicate: NSPredicate?,
-                                sortedBy: [NSSortDescriptor],
-                                keyPath: String,
-                                unique: Bool) -> ModelFieldResults {
-        let fetchReq = NSFetchRequest<NSDictionary>(entityName: entityName)
-        fetchReq.predicate = predicate
-        fetchReq.sortDescriptors = sortedBy
-        fetchReq.resultType = .dictionaryResultType
-        fetchReq.propertiesToFetch = [keyPath]
-        fetchReq.returnsDistinctResults = unique
-        return NSFetchedResultsController(fetchRequest: fetchReq,
-                                          managedObjectContext: managedObjectContext,
-                                          sectionNameKeyPath: nil,
-                                          cacheName: nil)
-    }
-    
     /// Clone a fetched-results-controller but with a different predicate
     public func cloneResults(_ results: ModelResults, withPredicate predicate: NSPredicate) -> ModelResults {
         guard let entityName = results.fetchRequest.entityName else {

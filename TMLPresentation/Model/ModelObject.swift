@@ -127,17 +127,17 @@ extension ModelObject where Self: NSManagedObject {
         return createAllResults(model: model).asModelResultsSet
     }
 
-    /// Set up a live query of fields using a given predicate
-    public static func createFieldResults(model: Model,
-                                          predicate: NSPredicate? = nil,
-                                          sortedBy: [NSSortDescriptor] = [defaultSortDescriptor],
-                                          keyPath: String,
-                                          unique: Bool) -> ModelFieldResults {
-        return model.createFieldResults(entityName: entityName,
-                                     predicate: predicate,
-                                     sortedBy: sortedBy,
-                                     keyPath: keyPath,
-                                     unique: unique)
+    /// Helper to build a `ModelFieldFetchRequest` for use with `ModelFieldWatcher`
+    public static func createFieldFetchRequest(predicate: NSPredicate? = nil,
+                                               sortedBy: [NSSortDescriptor] = [defaultSortDescriptor],
+                                               fields: [Any],
+                                               unique: Bool = false) -> ModelFieldFetchRequest {
+        let fetchReq = ModelFieldFetchRequest(entityName: entityName)
+        fetchReq.sortDescriptors = [defaultSortDescriptor]
+        fetchReq.resultType = .dictionaryResultType
+        fetchReq.propertiesToFetch = fields
+        fetchReq.returnsDistinctResults = unique
+        return fetchReq
     }
 
     // MARK: - Sort Orders

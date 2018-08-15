@@ -65,12 +65,8 @@ public protocol Model {
                               sortedBy: [NSSortDescriptor],
                               sectionNameKeyPath: String?) -> ModelResults
 
-    /// Set up a live query of fields of an entity
-    func createFieldResults(entityName: String,
-                            predicate: NSPredicate?,
-                            sortedBy: [NSSortDescriptor],
-                            keyPath: String,
-                            unique: Bool) -> ModelFieldResults
+    /// Run a fetch for field data
+    func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> [[String : AnyObject]]
 
     /// Clone a fetched-results-controller but with a different predicate
     func cloneResults(_ results: ModelResults, withPredicate predicate: NSPredicate) -> ModelResults
@@ -85,6 +81,9 @@ public protocol Model {
     
     /// Obtain a temporary child model workspace
     func createChildModel() -> Model
+
+    // MARK: - Until we have a better way of doing notifications
+    var managedObjectContext: NSManagedObjectContext { get }
 }
 
 ///
