@@ -8,25 +8,6 @@
 import Foundation
 import UIKit
 
-class TransitioningObject: NSObject, UIViewControllerAnimatedTransitioning {
-
-    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        let fromView: UIView = transitionContext.view(forKey: UITransitionContextViewKey.from)!
-        let toView: UIView = transitionContext.view(forKey: UITransitionContextViewKey.to)!
-
-        transitionContext.containerView.addSubview(fromView)
-        transitionContext.containerView.addSubview(toView)
-
-        UIView.transition(from: fromView, to: toView, duration: transitionDuration(using: transitionContext), options: UIView.AnimationOptions.transitionCurlUp) { finished in
-            transitionContext.completeTransition(true)
-        }
-    }
-
-    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        return 0.25
-    }
-}
-
 ///
 /// TabbedDirectorServices -- use for managing a UI based in a tab controller
 /// with each tab having a nav controller.
@@ -45,12 +26,8 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
         controller.delegate = self
     }
 
-    public func tabBarController(_ tabBarController: UITabBarController,
-                          animationControllerForTransitionFrom fromVC: UIViewController,
-                          to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        // tbd return TransitioningObject()
-        return nil
-    }
+    /// Routines to dynamically switch between tabs and have the presenters understand
+    private var presenterInvocationFunctions: [Int : (AnyObject) -> Void] = [:]
 
     /// During initialization, before 'presentUI', configure a tab's VC with a presenter.
     ///
@@ -81,6 +58,14 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
 
         let presenter = presenterFn(director, rootModel, queryResults, .multi(.manage), picked)
 
+        // We can't store an array of 'Presenter's so wrap up the refs to the specific type
+        presenterInvocationFunctions[tabIndex] = { any in
+            guard let invtype = any as? PresenterType.InvocationType else {
+                Log.fatal("Wrong invocation type provided.  Expected \(PresenterType.InvocationType.self) got \(any)")
+            }
+            presenter.invoke(with: invtype)
+        }
+
         PresenterUI.bind(viewController: targetVC, presenter: presenter)
     }
     
@@ -105,7 +90,7 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
     
     /// Switch the UI to a given tab displaying a set of results appropriate for that tab
     /// but filtered in some way, with a UI control visible indicating the filter is applied.
-    public func switchToFilteredTab<TablePresenterType>(tabIndex: Int, tableResults: ModelResultsSet, filterName: String, presenterType: TablePresenterType.Type) where TablePresenterType : TablePresenterInterface {
+    public func animateToTab(tabIndex: Int, invocationData: AnyObject) {
         guard let viewControllers = tabBarViewController.viewControllers else {
             Log.fatal("Missing view controller stack")
         }
@@ -114,37 +99,27 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
             Log.fatal("Confused about view controllers for \(tabIndex)")
         }
 
-        // TODO: well this is a bit of a mess, need to somehow lift up what's needed here into concrete.
-        // (or wait until Swift fixes protocol existentials)
-        guard let modelQueryTable = navController.viewControllers[0] as? PresentableTableVC<TablePresenterType> else {
-            Log.fatal("Can't find the goal table VC")
+        guard let presenterInvocation = presenterInvocationFunctions[tabIndex] else {
+            Log.fatal("No presenter invocation for tab \(tabIndex)")
         }
 
-        // Force view to load + run if we haven't done that yet!
-        _ = modelQueryTable.tableView
-        
-        modelQueryTable.setFilter(tableResults, filterName: filterName)
+        // Blow away stack of destination tab.
+        // (this might be bad - whinging in the console...)
         navController.popToRootViewController(animated: false)
-        
+
+        // Now do the animation to bring across the new state, then update the UI
         animateToTab(navController) {
             self.tabBarViewController.selectedViewController = navController
-            
-            // This reload fixes the case where app starts on eg. favgoals page,
-            // user switches to chars and clicks one.  Now the goals tab load for
-            // the first time, while not on-screen yet.  The CD query executes OK
-            // but for some reason the tableview will not display the contents --
-            // reloadData() causes a 'numberOfSections' / 'numberOfRowsInSection'
-            // sequence giving the correct answers, but then no calls to 'cellForRowAt'.
-            //
-            // Only way I have found to make it work is this next, which causes a new
-            // CD query to be run and a rebinding of the tableview's datasource/delegate.
-            modelQueryTable.setFilter(tableResults, filterName: filterName)
+
+            // Get the presenter to sort out the new state.  Originally wanted to
+            // do this before the animation, but hitting problems with uikit (searchcontroller)
+            // not updating properly unless actually on-screen.
+            presenterInvocation(invocationData)
         }
     }
     
     /// Animate the transition between tabs - used when doing this programatically to give the user
     /// a clue what is happening.  Kludged together from stackoverflow answers.
-    /// Not perfect - some strange transparency effect happening with the bars.
     private func animateToTab(_ destinationVC: UIViewController, andThen: @escaping () -> Void) {
         guard let currentVC = tabBarViewController.selectedViewController else {
             Log.fatal("No selected VC")
@@ -186,7 +161,6 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
                         currentView.center.x -= startingCurrToDest
         }) { finished in
             if finished {
-                Log.log("Director: animation done, cleaning up")
                 // fix up the views
                 destinationView.removeFromSuperview()
                 self.tabBarViewController.view.isUserInteractionEnabled = true

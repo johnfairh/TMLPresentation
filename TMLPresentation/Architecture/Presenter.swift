@@ -23,12 +23,22 @@ public protocol Presenter {
     associatedtype ModelType
     associatedtype ModelObjectType
     associatedtype ViewInterfaceType
+    associatedtype InvocationType = Void
 
     init(director: AppDirectorType,
          model: Model,
          object: ModelType?,
          mode: PresenterMode,
          dismiss: @escaping PresenterDone<ModelObjectType>)
+
+    /// Some presenters persist and can be invoked by the director during their
+    /// lifetime.  This interface, which by default does nothing, is called when
+    /// this happens.
+    func invoke(with data: InvocationType)
+}
+
+extension Presenter {
+    public func invoke(with data: InvocationType) {}
 }
 
 /// The signature of a `Presenter.init` that manages one object.
