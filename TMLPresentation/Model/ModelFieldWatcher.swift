@@ -25,11 +25,8 @@ public typealias ModelFieldFetchRequest = NSFetchRequest<NSDictionary>
 /// A type for the results of a field fetch request
 public typealias ModelFieldResults = [[String : AnyObject]]
 
-/// The delegate of the `ModelFieldWatcher` receives query results.
-public protocol ModelFieldWatcherDelegate: class {
-    /// Called on foreground queue when results of query may have changed
-    func updateQueryResults(results: ModelFieldResults)
-}
+/// The callback of the `ModelFieldWatcher` receives query results on the foreground queue.
+public typealias ModelFieldWatcherCallback = (ModelFieldResults) -> Void
 
 /// A `ModelFieldWatcher` watches the root context and refreshes the results
 /// of a field-based query when necessary.
@@ -50,11 +47,11 @@ public final class ModelFieldWatcher {
         }
     }
 
-    /// Set the watcher's delegate.  Setting this field causes the query to run
+    /// Set the watcher's callback.  Setting this field causes the query to run
     /// for the first time and results to start being reported.
-    public weak var delegate: ModelFieldWatcherDelegate? {
+    public var callback: ModelFieldWatcherCallback? {
         didSet {
-            if delegate != nil {
+            if callback != nil {
                 refresh()
             }
         }
@@ -69,7 +66,7 @@ public final class ModelFieldWatcher {
         bgModel.perform { model in
             let results = model.createFieldResults(fetchRequest: self.fetchRequest)
             Dispatch.toForeground {
-                self.delegate?.updateQueryResults(results: results)
+                self.callback?(results)
             }
         }
     }

@@ -133,6 +133,7 @@ extension ModelObject where Self: NSManagedObject {
                                                fields: [Any],
                                                unique: Bool = false) -> ModelFieldFetchRequest {
         let fetchReq = ModelFieldFetchRequest(entityName: entityName)
+        fetchReq.predicate = predicate
         fetchReq.sortDescriptors = [defaultSortDescriptor]
         fetchReq.resultType = .dictionaryResultType
         fetchReq.propertiesToFetch = fields
