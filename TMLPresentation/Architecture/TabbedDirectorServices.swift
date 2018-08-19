@@ -74,18 +74,29 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
         window.rootViewController = tabBarViewController
     }
     
-    /// Helper to obtain the currently presented nav controller
-    public override var currentNavController: UINavigationController {
-        // Start with current tab
+    /// Helper to obtain the currently presented nav controller/view controller
+    private var currentMaybeNavController: UINavigationController? {
         guard let tabNavController = tabBarViewController.selectedViewController as? UINavigationController else {
-            Log.fatal("doh currently selected is not a nav controller??")
+            return nil
         }
-        
+
         guard let presentedNavVC = tabNavController.visibleViewController?.navigationController else {
             Log.fatal("No presented nav view controller?")
         }
-        
+
         return presentedNavVC
+
+    }
+
+    public override var currentNavController: UINavigationController {
+        return currentMaybeNavController!
+    }
+
+    public override var currentViewController: UIViewController {
+        guard let navController = currentMaybeNavController else {
+            return tabBarViewController.selectedViewController!
+        }
+        return navController
     }
     
     /// Switch the UI to a given tab displaying a set of results appropriate for that tab

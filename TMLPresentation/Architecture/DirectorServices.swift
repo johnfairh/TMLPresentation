@@ -64,6 +64,10 @@ open class DirectorServices<AppDirectorType>: NSObject {
         
         // TODO: -Refactor all this properly - consult UINav.visibleViewController, is it the same??
     }
+
+    public var currentViewController: UIViewController {
+        Log.fatal("Also not implemented")
+    }
     
     /// Present a view of an existing object, pushed onto the current nav controller.
     /// No notification when the user clears the view.
@@ -109,13 +113,13 @@ open class DirectorServices<AppDirectorType>: NSObject {
         let presenter = presenterFn(director, editModel, editObject, .single(.edit)) {[weak self, weak editThingVc] _ in
             Log.log("Director: closing edit view")
             editThingVc?.view.endEditing(true)
-            self?.currentNavController.dismiss(animated: true, completion: nil)
+            self?.currentViewController.dismiss(animated: true, completion: nil)
             done(object)
         }
 
         PresenterUI.bind(viewController: editThingVc, presenter: presenter)
 
-        currentNavController.present(modalNavController, animated: true, completion: nil)
+        currentViewController.present(modalNavController, animated: true, completion: nil)
     }
     
     /// Present a modal view to create a new object.
@@ -138,7 +142,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         let presenter = presenterFn(director, editModel, nil, .single(.create)) { [weak self, weak createThingVc] object in
             createThingVc?.view.endEditing(true)
-            self?.currentNavController.dismiss(animated: true, completion: nil)
+            self?.currentViewController.dismiss(animated: true, completion: nil)
 
             guard let object = object else {
                 Log.log("Director: object create view abandoned")
@@ -153,7 +157,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         PresenterUI.bind(viewController: createThingVc, presenter: presenter)
 
-        currentNavController.present(modalNavController, animated: true, completion: nil)
+        currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
     /// Push a table view onto the current navigation stack to let the user pick an object.
