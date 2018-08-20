@@ -23,7 +23,7 @@ public final class ImageTransformer : ValueTransformer {
         guard let image = value as? UIImage else {
             Log.fatal("Image transformer confused")
         }
-        return image.jpegData(compressionQuality: 1.0)
+        return image.pngData()
     }
 
     public override func reverseTransformedValue(_ value: Any?) -> Any? {
