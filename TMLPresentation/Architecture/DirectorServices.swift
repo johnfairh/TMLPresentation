@@ -107,6 +107,10 @@ open class DirectorServices<AppDirectorType>: NSObject {
         let editThingVc        = loadVc(newVcIdentifier)
         let modalNavController = UINavigationController(rootViewController: editThingVc)
 
+        modalNavController.navigationBar.barStyle = .black
+        modalNavController.navigationBar.isTranslucent = false
+        modalNavController.navigationBar.tintColor = UIColor(named: "TintColour")
+
         let editModel  = model.createChildModel()
         let editObject = object.convert(editModel)
 
@@ -137,6 +141,10 @@ open class DirectorServices<AppDirectorType>: NSObject {
     {
         let createThingVc      = loadVc(newVcIdentifier)
         let modalNavController = UINavigationController(rootViewController: createThingVc)
+
+        modalNavController.navigationBar.barStyle = .black
+        modalNavController.navigationBar.isTranslucent = false
+        modalNavController.navigationBar.tintColor = UIColor(named: "TintColour")
 
         let editModel = model.createChildModel()
 

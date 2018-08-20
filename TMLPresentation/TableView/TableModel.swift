@@ -511,4 +511,12 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         }
         delegate?.objectsChanged()
     }
+
+    public func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let header = view as? UITableViewHeaderFooterView else {
+            Log.fatal("Header isn't a header :/")
+        }
+        header.textLabel?.textColor = .white
+        header.contentView.backgroundColor = .darkText
+    }
 }

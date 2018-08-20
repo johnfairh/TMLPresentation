@@ -152,6 +152,8 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.scopeButtonTitles = scopes
+        searchController.searchBar.tintColor = UIColor(named: "TintColour")
+
 
         // VERY IMPORTANT TO NOT SET `showsScopeBar`
         //
