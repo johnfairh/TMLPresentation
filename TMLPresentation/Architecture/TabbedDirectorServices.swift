@@ -76,15 +76,26 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
     
     /// Helper to obtain the currently presented nav controller/view controller
     private var currentMaybeNavController: UINavigationController? {
-        guard let tabNavController = tabBarViewController.selectedViewController as? UINavigationController else {
-            return nil
+        guard let selectedVC = tabBarViewController.selectedViewController else {
+            Log.fatal("No tab selected?")
         }
 
-        guard let presentedNavVC = tabNavController.visibleViewController?.navigationController else {
+        let navController: UINavigationController
+
+        if selectedVC is UINavigationController {
+            navController = selectedVC as! UINavigationController
+        } else if selectedVC.presentedViewController is UINavigationController {
+            navController = selectedVC.presentedViewController as! UINavigationController
+        } else {
+            return nil
+        }
+        // navController is the NavVC at the bottom of any stack.  We want the one at the top.
+
+        guard let topNavVC = navController.visibleViewController?.navigationController else {
             Log.fatal("No presented nav view controller?")
         }
 
-        return presentedNavVC
+        return topNavVC
 
     }
 
