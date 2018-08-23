@@ -82,7 +82,7 @@ extension ModelObject where Self: NSManagedObject {
         return to.convertFromOtherModel(self) as! Self
     }
     
-    public static func find(from model:Model, named:String) -> Self? {
+    public static func find(from model: Model, named: String) -> Self? {
         return model.find(entityName, name: named) as? Self
     }
     
@@ -96,6 +96,12 @@ extension ModelObject where Self: NSManagedObject {
         return model.findFirst(entityName: entityName,
                                predicate: predicate,
                                sortedBy: sortedBy) as? Self
+    }
+
+    public static func findAll(model: Model,
+                               predicate: NSPredicate? = nil,
+                               sortedBy: [NSSortDescriptor] = [defaultSortDescriptor]) -> [Self] {
+        return model.findAll(entityName: entityName, predicate: predicate, sortedBy: sortedBy) as! [Self]
     }
     
     public func delete(from model:Model) {

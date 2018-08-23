@@ -197,7 +197,22 @@ open class ModelServices: Model {
         }
         return []
     }
-    
+
+    /// Find all objects matching a predicate, sorted.  Static array returned.
+    public func findAll(entityName: String,
+                        predicate: NSPredicate?,
+                        sortedBy: [NSSortDescriptor]) -> [NSManagedObject] {
+        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
+        fetchReq.predicate = predicate
+        fetchReq.sortDescriptors = sortedBy
+        fetchReq.returnsObjectsAsFaults = false
+        do {
+            return try managedObjectContext.fetch(fetchReq)
+        } catch {
+            Log.log("**** Model: Fetch request for \(entityName) failed, \(error)")
+        }
+        return []
+    }
     
     /// Set up a live query ready to run, using a template in the data model
     public func createFetchedResults(fetchReqName reqName: String,

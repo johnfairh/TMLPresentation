@@ -52,6 +52,11 @@ public protocol Model {
                  sortedBy: [NSSortDescriptor],
                  substitutionVariables vars: [String:AnyObject]) -> [NSManagedObject]
 
+    /// Find all objects matching a predicate, sorted.  Static array returned.
+    func findAll(entityName: String,
+                 predicate: NSPredicate?,
+                 sortedBy: [NSSortDescriptor]) -> [NSManagedObject]
+
     /// Set up a live query ready to run, using predicates from the model
     func createFetchedResults(fetchReqName reqName: String,
                               sortedBy: [NSSortDescriptor],
