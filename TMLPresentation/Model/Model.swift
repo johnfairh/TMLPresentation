@@ -47,6 +47,9 @@ public protocol Model {
     /// Count the number of objects that would be returned by a findAll
     func count(fetchReqName reqName:String, substitutionVariables vars: [String:AnyObject]) -> Int
 
+    /// Count the number of objects that would be returned by a findAll
+    func count(entityName: String, predicate: NSPredicate?) -> Int
+
     /// Find all objects in a given query - static array returned, not updated subsequently
     func findAll(fetchReqName reqName: String,
                  sortedBy: [NSSortDescriptor],
@@ -114,6 +117,10 @@ extension Model {
     
     public func count(fetchReqName reqName: String) -> Int {
         return count(fetchReqName: reqName, substitutionVariables: [:])
+    }
+
+    public func count(entityName: String) -> Int {
+        return count(entityName: entityName, predicate: nil)
     }
     
     public func save() {

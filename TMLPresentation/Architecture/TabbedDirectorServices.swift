@@ -192,4 +192,15 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
             }
         }
     }
+
+    /// Set the tab icon badge
+    public func setTabBadge(tab: Int, badge: String?) {
+        guard let viewController = tabBarViewController.viewControllers?[tab] else {
+            Log.fatal("No VC for tab \(tab)")
+        }
+        guard let barItem = viewController.tabBarItem else {
+            Log.fatal("No bar item for tab \(tab)")
+        }
+        barItem.badgeValue = badge
+    }
 }

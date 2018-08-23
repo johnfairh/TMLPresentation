@@ -98,6 +98,10 @@ extension ModelObject where Self: NSManagedObject {
                                sortedBy: sortedBy) as? Self
     }
 
+    public static func count(model: Model, predicate: NSPredicate? = nil) -> Int {
+        return model.count(entityName: entityName, predicate: predicate)
+    }
+
     public static func findAll(model: Model,
                                predicate: NSPredicate? = nil,
                                sortedBy: [NSSortDescriptor] = [defaultSortDescriptor]) -> [Self] {

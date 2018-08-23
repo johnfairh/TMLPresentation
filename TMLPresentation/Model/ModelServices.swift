@@ -49,7 +49,7 @@ open class ModelServices: Model {
     }
 
     /// Helper to manually create a fetchrequest
-    func createFetchReq(entityName: String, predicate: NSPredicate?, sortedBy: [NSSortDescriptor]) -> NSFetchRequest<NSManagedObject> {
+    func createFetchReq(entityName: String, predicate: NSPredicate?, sortedBy: [NSSortDescriptor] = []) -> NSFetchRequest<NSManagedObject> {
         let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
         fetchReq.predicate = predicate
         fetchReq.sortDescriptors = sortedBy
@@ -182,6 +182,17 @@ open class ModelServices: Model {
             return try managedObjectContext.count(for: fetchReq)
         } catch {
             Log.fatal("Can't count \(reqName) - \(error)")
+        }
+    }
+
+    public func count(entityName: String, predicate: NSPredicate?) -> Int {
+        let fetchReq = createFetchReq(entityName: entityName, predicate: predicate)
+        fetchReq.resultType = .countResultType
+
+        do {
+            return try managedObjectContext.count(for: fetchReq)
+        } catch {
+            Log.fatal("Can't count - \(error)")
         }
     }
     
