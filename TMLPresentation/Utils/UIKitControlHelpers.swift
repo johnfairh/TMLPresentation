@@ -118,3 +118,15 @@ extension UISearchBar {
         return field
     }
 }
+
+extension UIViewController {
+    /// Pop up simple choice at bottom of screen, report which one is made
+    public func presentActionSheetChoice<T>(choices: [String], results: [T], done: @escaping (T?) -> Void) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        for (index, choice) in choices.enumerated() {
+            alert.addAction(UIAlertAction(title: choice, style: .default) {_ in done(results[index]) })
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) {_ in done(nil) })
+        present(alert, animated: true)
+    }
+}
