@@ -36,36 +36,18 @@ public protocol Model {
     /// Find an object by name
     func find(_ entityName: String, name: String) -> NSManagedObject?
     
-    /// Find the 'first' object under some query+sort
-    func findFirst(sortDescriptor: NSSortDescriptor, fetchReqName: String) -> NSManagedObject?
-
     /// Find the 'first' object under some predicate + sort
     func findFirst(entityName: String, predicate: NSPredicate, sortedBy: [NSSortDescriptor]) -> NSManagedObject?
 
     // MARK: - General queries
 
     /// Count the number of objects that would be returned by a findAll
-    func count(fetchReqName reqName:String, substitutionVariables vars: [String:AnyObject]) -> Int
-
-    /// Count the number of objects that would be returned by a findAll
     func count(entityName: String, predicate: NSPredicate?) -> Int
-
-    /// Find all objects in a given query - static array returned, not updated subsequently
-    func findAll(fetchReqName reqName: String,
-                 sortedBy: [NSSortDescriptor],
-                 substitutionVariables vars: [String:AnyObject]) -> [NSManagedObject]
 
     /// Find all objects matching a predicate, sorted.  Static array returned.
     func findAll(entityName: String,
                  predicate: NSPredicate?,
                  sortedBy: [NSSortDescriptor]) -> [NSManagedObject]
-
-    /// Set up a live query ready to run, using predicates from the model
-    func createFetchedResults(fetchReqName reqName: String,
-                              sortedBy: [NSSortDescriptor],
-                              substitutionVariables vars: [String:AnyObject],
-                              sectionNameKeyPath: String?) -> ModelResults
-
 
     /// Set up a live query ready to run, using a given predicate
     func createFetchedResults(entityName: String,
@@ -103,22 +85,7 @@ public protocol Model {
 ///
 /// Extension to provide default arguments to certain methods
 ///
-extension Model {
-    
-    public func createFetchedResults(fetchReqName reqName: String,
-                                     sortedBy: [NSSortDescriptor],
-                                     substitutionVariables vars: [String:AnyObject] = [:]) -> ModelResults {
-        return createFetchedResults(fetchReqName: reqName, sortedBy: sortedBy, substitutionVariables: vars, sectionNameKeyPath: nil)
-    }
-
-    public func findAll(fetchReqName reqName: String, sortedBy: [NSSortDescriptor]) -> [NSManagedObject] {
-        return findAll(fetchReqName: reqName, sortedBy: sortedBy, substitutionVariables: [:])
-    }
-    
-    public func count(fetchReqName reqName: String) -> Int {
-        return count(fetchReqName: reqName, substitutionVariables: [:])
-    }
-
+extension Model {    
     public func count(entityName: String) -> Int {
         return count(entityName: entityName, predicate: nil)
     }

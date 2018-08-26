@@ -34,22 +34,8 @@ open class ModelServices: Model {
     
     // MARK: - FetchRequest helpers
     
-    /// Helper to load + configure a request from the model
-    private func loadFetchRequest(_ fetchReqName: String,
-                                  sortedBy: [NSSortDescriptor],
-                                  substitutionVariables vars: [String:AnyObject] = [:]) -> NSFetchRequest<NSManagedObject> {
-        // ok so because we want to put a sort on, and we can't put a sort on in the MOM version,
-        // we have to use ...fromTemplateWithName... because otherwise it crashes.
-        guard let fetchReq = managedObjectModel.fetchRequestFromTemplate(withName: fetchReqName,
-                                                                         substitutionVariables: vars) else {
-            Log.fatal("Can't load fetch request \(fetchReqName) from model")
-        }
-        fetchReq.sortDescriptors = sortedBy
-        return fetchReq as! NSFetchRequest<NSManagedObject>
-    }
-
     /// Helper to manually create a fetchrequest
-    func createFetchReq(entityName: String, predicate: NSPredicate?, sortedBy: [NSSortDescriptor] = []) -> NSFetchRequest<NSManagedObject> {
+    func createFetchReq(entityName: String, predicate: NSPredicate? = nil, sortedBy: [NSSortDescriptor] = []) -> NSFetchRequest<NSManagedObject> {
         let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
         fetchReq.predicate = predicate
         fetchReq.sortDescriptors = sortedBy
@@ -71,11 +57,13 @@ open class ModelServices: Model {
         return result
     }
 
-    /// Helper to issue a fetch request for fields
+    // MARK: - Field watcher
+
+    /// Issue a fetch request for fields
     public func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> ModelFieldResults {
         do {
             let rawResults = try managedObjectContext.fetch(fetchRequest)
-            guard let fieldResults = rawResults as? [[String : AnyObject]] else {
+            guard let fieldResults = rawResults as? ModelFieldResults else {
                 Log.fatal("Bad type coming back from core data - \(rawResults)")
             }
             return fieldResults
@@ -85,6 +73,7 @@ open class ModelServices: Model {
         return []
     }
 
+    /// Create an object to watch fields changing
     public func createFieldWatcher(fetchRequest: ModelFieldFetchRequest) -> ModelFieldWatcher {
         return ModelFieldWatcher(baseModel: self, fetchRequest: fetchRequest)
     }
@@ -118,6 +107,8 @@ open class ModelServices: Model {
     public func convertFromOtherModel(_ object: NSManagedObject) -> NSManagedObject {
         return managedObjectContext.object(with: object.objectID)
     }
+
+    // MARK: - Sort
     
     /// Get the next sort order value for a particular MO + sort key
     ///
@@ -129,11 +120,10 @@ open class ModelServices: Model {
     ///
     public func getNextSortOrderValue(_ entityName: String, keyName: String) -> Int64 {
         let sortDescriptor = NSSortDescriptor(key: keyName, ascending: false)
-        
-        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
-        fetchReq.sortDescriptors        = [sortDescriptor]
+
+        let fetchReq = createFetchReq(entityName: entityName, sortedBy: [sortDescriptor])
         fetchReq.returnsObjectsAsFaults = false
-        assert(fetchReq.includesPendingChanges)
+        Log.assert(fetchReq.includesPendingChanges)
         
         guard let result = issueSingularFetchRequest(fetchReq: fetchReq) else {
             // no objects - sort order 0
@@ -155,88 +145,40 @@ open class ModelServices: Model {
     
     /// Find an object by name
     public func find(_ entityName: String, name: String) -> NSManagedObject? {
-        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
-        fetchReq.predicate = NSPredicate(format: "name == %@", argumentArray: [name])
+        let predicate = NSPredicate(format: "name == %@", argumentArray: [name])
+        let fetchReq = createFetchReq(entityName: entityName, predicate: predicate)
         return issueSingularFetchRequest(fetchReq: fetchReq)
     }
     
-    /// Find the 'first' object under some query+sort
-    public func findFirst(sortDescriptor: NSSortDescriptor, fetchReqName: String) -> NSManagedObject? {
-        let fetchReq = loadFetchRequest(fetchReqName, sortedBy: [sortDescriptor])
-        return issueSingularFetchRequest(fetchReq: fetchReq)
-    }
-
     /// Find the 'first' object under some predicate + sort
     public func findFirst(entityName: String, predicate: NSPredicate, sortedBy: [NSSortDescriptor]) -> NSManagedObject? {
         let fetchReq = createFetchReq(entityName: entityName, predicate: predicate, sortedBy: sortedBy)
         return issueSingularFetchRequest(fetchReq: fetchReq)
     }
     
-    /// Count the number of objects that would be returned by a findAll
-    public func count(fetchReqName reqName:String, substitutionVariables vars: [String:AnyObject]) -> Int {
-        // Grab fetchreq from model + tweak
-        let fetchReq = loadFetchRequest(reqName, sortedBy: [], substitutionVariables: vars)
-        fetchReq.resultType = .countResultType
-        
-        do {
-            return try managedObjectContext.count(for: fetchReq)
-        } catch {
-            Log.fatal("Can't count \(reqName) - \(error)")
-        }
-    }
-
     public func count(entityName: String, predicate: NSPredicate?) -> Int {
-        let fetchReq = createFetchReq(entityName: entityName, predicate: predicate)
-        fetchReq.resultType = .countResultType
-
         do {
+            let fetchReq = createFetchReq(entityName: entityName, predicate: predicate)
+            fetchReq.resultType = .countResultType
             return try managedObjectContext.count(for: fetchReq)
         } catch {
             Log.fatal("Can't count - \(error)")
         }
     }
     
-    /// Find all objects in a given query - static array returned, not updated subsequently
-    public func findAll(fetchReqName reqName: String,
-                        sortedBy: [NSSortDescriptor],
-                        substitutionVariables vars: [String:AnyObject]) -> [NSManagedObject] {
-        let fetchReq = loadFetchRequest(reqName, sortedBy: sortedBy, substitutionVariables: vars)
-        do {
-            return try managedObjectContext.fetch(fetchReq)
-        } catch {
-            Log.log("**** Model: Fetch request for \(reqName) failed, \(error)")
-        }
-        return []
-    }
-
     /// Find all objects matching a predicate, sorted.  Static array returned.
     public func findAll(entityName: String,
                         predicate: NSPredicate?,
                         sortedBy: [NSSortDescriptor]) -> [NSManagedObject] {
-        let fetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
-        fetchReq.predicate = predicate
-        fetchReq.sortDescriptors = sortedBy
-        fetchReq.returnsObjectsAsFaults = false
         do {
+            let fetchReq = createFetchReq(entityName: entityName, predicate: predicate, sortedBy: sortedBy)
+            fetchReq.returnsObjectsAsFaults = false
             return try managedObjectContext.fetch(fetchReq)
         } catch {
-            Log.log("**** Model: Fetch request for \(entityName) failed, \(error)")
+            Log.fatal("**** Model: Fetch request for \(entityName) failed, \(error)")
         }
-        return []
     }
     
-    /// Set up a live query ready to run, using a template in the data model
-    public func createFetchedResults(fetchReqName reqName: String,
-                                     sortedBy: [NSSortDescriptor],
-                                     substitutionVariables vars: [String:AnyObject],
-                                     sectionNameKeyPath: String?) -> ModelResults {
-        let fetchReq = loadFetchRequest(reqName, sortedBy: sortedBy, substitutionVariables: vars)
-        return NSFetchedResultsController(fetchRequest: fetchReq,
-                                          managedObjectContext: managedObjectContext,
-                                          sectionNameKeyPath: sectionNameKeyPath,
-                                          cacheName: nil)
-    }
-
     /// Set up a live query ready to run, using a given predicate
     public func createFetchedResults(entityName: String,
                                      predicate: NSPredicate?,
@@ -256,9 +198,8 @@ open class ModelServices: Model {
         guard let entityName = results.fetchRequest.entityName else {
             Log.fatal("Missing entity name")
         }
-        let newFetchReq = NSFetchRequest<NSManagedObject>(entityName: entityName)
-        newFetchReq.predicate = predicate
-        newFetchReq.sortDescriptors = results.fetchRequest.sortDescriptors
+        let newFetchReq = createFetchReq(entityName: entityName, predicate: predicate,
+                                         sortedBy: results.fetchRequest.sortDescriptors ?? [])
         // TODO: should really copy all the other settings...
         return NSFetchedResultsController(fetchRequest: newFetchReq,
                                           managedObjectContext: managedObjectContext,

@@ -14,6 +14,8 @@ import CoreData
 /// 1) Inherit from NSManagedObject
 /// 2) Have the same class name as the Core Data entity that they are managing
 ///
+/// Almost all of the implementation is in the extension below that constrains
+/// to `NSManagedObject`.
 public protocol ModelObject {
     /// Create a new instance inserted into the model
     static func create(from model: Model) -> Self
@@ -24,9 +26,6 @@ public protocol ModelObject {
     /// Look up an existing instance in the model
     static func find(from model: Model, named: String) -> Self?
     
-    /// Look up the 'first' instance - using the default sort order
-    static func findFirst(from model: Model, fetchReqName: String) -> Self?
-
     /// Look up the 'first' instance under some predicate
     static func findFirst(model: Model,
                           predicate: NSPredicate,
@@ -86,10 +85,6 @@ extension ModelObject where Self: NSManagedObject {
         return model.find(entityName, name: named) as? Self
     }
     
-    public static func findFirst(from model: Model, fetchReqName: String) -> Self? {
-        return model.findFirst(sortDescriptor: defaultSortDescriptor, fetchReqName: fetchReqName) as? Self
-    }
-
     public static func findFirst(model: Model,
                                  predicate: NSPredicate,
                                  sortedBy: [NSSortDescriptor] = [defaultSortDescriptor]) -> Self? {

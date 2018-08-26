@@ -130,8 +130,8 @@
 				028F3D912105F5530010C41B /* ModelObject.swift */,
 				028F3D922105F5530010C41B /* ModelProvider.swift */,
 				028F3D932105F5530010C41B /* ModelResults.swift */,
-				020825F321246ECB007578C7 /* ModelFieldWatcher.swift */,
 				028F3D942105F5530010C41B /* ModelServices.swift */,
+				020825F321246ECB007578C7 /* ModelFieldWatcher.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
