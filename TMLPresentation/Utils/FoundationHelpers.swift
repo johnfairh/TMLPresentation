@@ -53,3 +53,48 @@ public enum Prefs {
         return UserDefaults.standard.bool(forKey: pref)
     }
 }
+
+// MARK: - FileManager
+
+extension FileManager {
+    /// Get a new temporary directory.  Caller must delete.
+    public func newTemporaryDirectoryURL() throws -> URL {
+        let directoryURL = temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try createDirectory(at: directoryURL, withIntermediateDirectories: false)
+        return directoryURL
+    }
+
+    /// Get a new temporary file.  Caller must delete.
+    /// - parameter extension: Should not start with a dot.
+    public func temporaryFileURL(inDirectory directory: URL? = nil, extension: String? = nil) -> URL {
+        var filename = UUID().uuidString
+        if let ext = `extension` {
+            filename.append(".\(ext)")
+        }
+        let directoryURL = directory ?? temporaryDirectory
+        return directoryURL.appendingPathComponent(filename)
+    }
+}
+
+public struct TemporaryDirectory {
+    public private(set) var directoryURL: URL?
+
+    public var exists: Bool {
+        return directoryURL != nil
+    }
+
+    public mutating func createNewFile() throws -> URL {
+        if directoryURL == nil {
+            directoryURL = try FileManager.default.newTemporaryDirectoryURL()
+        }
+        return FileManager.default.temporaryFileURL(inDirectory: directoryURL)
+    }
+
+    public mutating func deleteAll() {
+        if let directoryURL = directoryURL {
+            try? FileManager.default.removeItem(at: directoryURL)
+            self.directoryURL = nil
+        }
+    }
+}
+
