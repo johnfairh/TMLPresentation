@@ -45,6 +45,33 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
                                                         picked: @escaping PresenterDone<ModelObjectType> = { _ in })
     where ModelObjectType: ModelObject, PresenterType: Presenter {
 
+        let presenter = presenterFn(director, rootModel, queryResults, .multi(.manage), picked)
+        store(presenter: presenter, forTab: tabIndex)
+        bind(presenter: presenter, forTab: tabIndex)
+    }
+
+    /// Alternative tab type for tabs that are not actively managing model data.
+    public func initTab<PresenterType>(tabIndex: Int,
+                                       rootModel: Model,
+                                       presenterFn: NulPresenterFn<AppDirectorType, PresenterType>) where PresenterType: Presenter {
+        let presenter = presenterFn(director, rootModel)
+        store(presenter: presenter, forTab: tabIndex)
+        bind(presenter: presenter, forTab: tabIndex)
+    }
+
+    /// Store an entrypoint to allow programmatic switching to a tab.
+    /// We can't store an array of 'Presenter's so wrap up the refs to the specific type
+    private func store<PresenterType: Presenter>(presenter: PresenterType, forTab tabIndex: Int) {
+        presenterInvocationFunctions[tabIndex] = { any in
+            guard let invtype = any as? PresenterType.InvocationType else {
+                Log.fatal("Wrong invocation type provided.  Expected \(PresenterType.InvocationType.self) got \(any)")
+            }
+            presenter.invoke(with: invtype)
+        }
+    }
+
+    /// Find the view controller from the storyboard UI and set its presenter ref
+    private func bind<PresenterType: Presenter>(presenter: PresenterType, forTab tabIndex: Int) {
         guard let vcInTab = tabBarViewController.viewControllers?[tabIndex] else {
             Log.fatal("Tab \(tabIndex) missing")
         }
@@ -54,16 +81,6 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
             targetVC = navController.viewControllers[0]
         } else {
             targetVC = vcInTab
-        }
-
-        let presenter = presenterFn(director, rootModel, queryResults, .multi(.manage), picked)
-
-        // We can't store an array of 'Presenter's so wrap up the refs to the specific type
-        presenterInvocationFunctions[tabIndex] = { any in
-            guard let invtype = any as? PresenterType.InvocationType else {
-                Log.fatal("Wrong invocation type provided.  Expected \(PresenterType.InvocationType.self) got \(any)")
-            }
-            presenter.invoke(with: invtype)
         }
 
         PresenterUI.bind(viewController: targetVC, presenter: presenter)

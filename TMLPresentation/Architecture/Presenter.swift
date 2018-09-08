@@ -42,12 +42,16 @@ extension Presenter {
 }
 
 /// The signature of a `Presenter.init` that manages one object.
-public typealias SinglePresenterFn<AppDirectorType,ModelObjectType,PresenterType> =
+public typealias SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType> =
     (AppDirectorType, Model, ModelObjectType?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
 
 /// The signature of a `Presenter.init` that manages multiple objects.
-public typealias MultiPresenterFn<AppDirectorType,ModelObjectType,PresenterType> =
+public typealias MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType> =
     (AppDirectorType, Model, ModelResultsSet?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
+
+/// The signature of a `Presenter.init` that doesn't manage any objects.
+public typealias NulPresenterFn<AppDirectorType, PresenterType> =
+    (AppDirectorType, Model) -> PresenterType
 
 /// PresenterMode - used as a hint from Director for Presenter/View combinations that serve in
 /// multiple roles.
