@@ -18,6 +18,11 @@ import os
 /// Not sure this is great really, losing all the interpolation stuff.  TBD when a usable
 /// os_log wrapper shows up.
 ///
+
+public protocol LogBuffer {
+    func log(line: String)
+}
+
 public enum Log {
     public static var enableDebugLogs = false
 
@@ -34,7 +39,10 @@ public enum Log {
         }
     }
 
+    public static var logBuffer: LogBuffer?
+
     private static func logWithNsLog(message: String) {
+        logBuffer?.log(line: message)
         NSLog(message)
     }
 
