@@ -106,10 +106,10 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
         } else {
             return nil
         }
-        // navController is the NavVC at the bottom of any stack.  We want the one at the top.
 
+        // navController is the NavVC at the bottom of any stack.  We want the one at the top.
         guard let topNavVC = navController.visibleViewController?.navigationController else {
-            Log.fatal("No presented nav view controller?")
+            return navController // Yikes, need this for the more... tab.
         }
 
         return topNavVC
