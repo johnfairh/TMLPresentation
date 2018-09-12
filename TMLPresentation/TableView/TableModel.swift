@@ -89,6 +89,9 @@ public protocol TableModelDelegate: class {
     /// Sections decoding
     func getSectionTitle(name: String) -> String
     func getSectionObject(name: String) -> SectionType
+
+    /// Section header customization
+    func willDisplaySectionHeader(_ header: UITableViewHeaderFooterView)
 }
 
 /// Extension to provide safe defaults
@@ -109,6 +112,7 @@ public extension TableModelDelegate {
     func leadingSwipeActionsForObject(_ modelObject: ModelType) -> TableSwipeAction? { return nil }
     func getSectionTitle(name: String) -> String { return name }
     func getSectionObject(name: String) -> String { return name }
+    func willDisplaySectionHeader(_ header: UITableViewHeaderFooterView) {}
 }
 
 // MARK: - TableModel
@@ -424,6 +428,15 @@ public final class TableModel<CellType, DelegateType> : NSObject,
     public func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
         // We never get here, more's the pity, because UITableView decides to invoke `moveRow`.
         Log.fatal("performDropWith() -- what to do?")
+    }
+
+    // MARK: - Colors
+
+    public func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        guard let headerView = view as? UITableViewHeaderFooterView else {
+            return
+        }
+        delegate?.willDisplaySectionHeader(headerView)
     }
 
     // MARK: - NSFetchedResultsControllerDelegate
