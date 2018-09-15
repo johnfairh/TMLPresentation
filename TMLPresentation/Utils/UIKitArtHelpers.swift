@@ -12,6 +12,8 @@ import UIKit
 /// but evolved under all my own horrible hard-coded ways...
 extension UIImage {
 
+    public static var badgeColor: UIColor?
+
     private func addTextBadge(_ size: CGSize, text: String) {
         let nsString = NSString(string: text)
 
@@ -21,7 +23,7 @@ extension UIImage {
             [ NSAttributedString.Key.font: font,
               NSAttributedString.Key.strokeWidth: 10.0,
               NSAttributedString.Key.strokeColor: UIColor.black,
-              NSAttributedString.Key.foregroundColor: UIColor.white ]
+              NSAttributedString.Key.foregroundColor: UIImage.badgeColor ?? UIColor.white ]
 
         let textSize = nsString.size(withAttributes: attrs)
         var xOffset = 1, yOffset = 3
