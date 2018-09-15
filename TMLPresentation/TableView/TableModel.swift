@@ -37,12 +37,12 @@ public protocol TableCell {
 /// Structure to describe a leading-edge swipe action
 public struct TableSwipeAction {
     public let text: String
-    public let colorName: String?
+    public let color: UIColor?
     public let action: () -> Void
 
-    public init(text: String, colorName: String? = nil, action: @escaping () -> Void) {
+    public init(text: String, color: UIColor? = nil, action: @escaping () -> Void) {
         self.text = text
-        self.colorName = colorName
+        self.color = color
         self.action = action
     }
 }
@@ -305,8 +305,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             action.action()
             continuation(true)
         }
-        if let colorName = action.colorName {
-            uiAction.backgroundColor = UIColor(named: colorName) ?? .green
+        if let color = action.color {
+            uiAction.backgroundColor = color
         }
         return UISwipeActionsConfiguration(actions: [uiAction])
     }
