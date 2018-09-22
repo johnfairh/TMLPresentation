@@ -52,6 +52,22 @@ public enum Prefs {
     public static func bool(_ pref: String) -> Bool {
         return UserDefaults.standard.bool(forKey: pref)
     }
+
+    public static func set(_ pref: String, to value: Int) {
+        UserDefaults.standard.set(value, forKey: pref)
+    }
+
+    public static func int(_ pref: String) -> Int {
+        return UserDefaults.standard.integer(forKey: pref)
+    }
+
+    public static func set(_ pref: String, to value: String) {
+        UserDefaults.standard.set(value, forKey: pref)
+    }
+
+    public static func string(_ pref: String) -> String {
+        return UserDefaults.standard.string(forKey: pref) ?? ""
+    }
 }
 
 // MARK: - FileManager
