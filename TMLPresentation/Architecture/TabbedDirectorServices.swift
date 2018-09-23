@@ -14,15 +14,17 @@ import UIKit
 ///
 open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirectorType>, UITabBarControllerDelegate {
     private var tabBarViewController: UITabBarController!
+    private var initialTabIndex: Int?
     
     /// Provide app director instance, the window to put view controllers in, and the name of the tab VC
-    public init(director: AppDirectorType, window: UIWindow, tabBarVcName: String) {
+    public init(director: AppDirectorType, window: UIWindow, tabBarVcName: String, tabIndex: Int?) {
         super.init(director: director, window: window)
         
         guard let controller = loadVc(tabBarVcName) as? UITabBarController else {
             Log.fatal("VC \(tabBarVcName) is not a UITabBarController")
         }
         self.tabBarViewController = controller
+        self.initialTabIndex = tabIndex
         controller.delegate = self
     }
 
@@ -88,6 +90,9 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
     
     /// Call when the model layer is all ready to go, enables the UI
     public func presentUI() {
+        if let tabIndex = initialTabIndex {
+            tabBarViewController.selectedIndex = tabIndex
+        }
         window.rootViewController = tabBarViewController
     }
     
@@ -126,7 +131,11 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
         }
         return navController
     }
-    
+
+    public var currentTabIndex: Int {
+        return tabBarViewController.selectedIndex
+    }
+
     /// Switch the UI to a given tab displaying a set of results appropriate for that tab
     /// but filtered in some way, with a UI control visible indicating the filter is applied.
     public func animateToTab(tabIndex: Int, invocationData: AnyObject) {
