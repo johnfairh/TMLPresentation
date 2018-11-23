@@ -63,6 +63,10 @@ public enum PresenterMode {
         /// to dismiss with any result (which should be nil for a cancellation)
         case create
 
+        /// View is expected to create a new instance based on the one passed in and act like
+        /// `create`.
+        case dup
+
         /// View is of an existing instance, any editting must be live.  May call 'dismiss'
         /// to dismiss the view, any result passed is ignored.
         case view

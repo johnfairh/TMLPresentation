@@ -131,6 +131,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
     /// [this works fine in our use cases, should perhaps be more general though]
     public func createThing<PresenterType,ModelObjectType>(_ newVcIdentifier: String,
                     model: Model,
+                    from: ModelObjectType? = nil,
                     presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>,
                     done: @escaping (ModelObjectType)->Void)
         where PresenterType: Presenter, ModelObjectType: ModelObject
@@ -140,7 +141,18 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         let editModel = model.createChildModel()
 
-        let presenter = presenterFn(director, editModel, nil, .single(.create)) { [weak self, weak createThingVc] object in
+        let mode: PresenterMode
+        let fromObject: ModelObjectType?
+
+        if let from = from {
+            mode = .single(.dup)
+            fromObject = from.convert(editModel)
+        } else {
+            mode = .single(.create)
+            fromObject = nil
+        }
+
+        let presenter = presenterFn(director, editModel, fromObject, mode) { [weak self, weak createThingVc] object in
             createThingVc?.view.endEditing(true)
             self?.currentViewController.dismiss(animated: true, completion: nil)
 
