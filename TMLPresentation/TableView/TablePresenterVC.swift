@@ -143,6 +143,21 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         presenter.filteredResults = nil
     }
 
+    // MARK: - Pull-to-create
+
+    public func enablePullToCreate() {
+        let refresh = UIRefreshControl()
+        refresh.tintColor = .clear
+        refresh.addTarget(self, action: #selector(refreshTriggered), for: .valueChanged)
+        refreshControl = refresh
+    }
+
+    @objc
+    func refreshTriggered() {
+        refreshControl?.endRefreshing()
+        presenter.createNewObject()
+    }
+
     // MARK: - Search
 
     private var searchTextColor: UIColor?
