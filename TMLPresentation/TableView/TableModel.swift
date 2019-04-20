@@ -486,6 +486,9 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             Log.tableLog("FRCD - .row(update) \(indexPath!)")
         case .insert:
             Log.tableLog("FRCD - .row(insert) \(newIndexPath!)")
+        @unknown default:
+            Log.tableLog("FRCD - .row(???) goodness me - \(type)")
+            return
         }
 
         // Bail immediately if the events are driven by user direct manipulation, in which
@@ -514,6 +517,9 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             tableView?.reloadRows(at: [indexPath!], with: .automatic)
         case .insert:
             tableView?.insertRows(at: [newIndexPath!], with: .fade)
+        @unknown default:
+            // unreachable due to switch above, bad compiler.
+            Log.fatal("Very confused")
         }
     }
     

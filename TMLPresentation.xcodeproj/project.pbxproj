@@ -194,6 +194,7 @@
 				TargetAttributes = {
 					028F3D7A2105F5210010C41B = {
 						CreatedOnToolsVersion = 10.0;
+						LastSwiftMigration = 1020;
 					};
 				};
 			};
@@ -203,6 +204,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 028F3D712105F5210010C41B;
 			productRefGroup = 028F3D7C2105F5210010C41B /* Products */;
@@ -402,7 +404,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = tml.TMLPresentation;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -431,7 +433,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = tml.TMLPresentation;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

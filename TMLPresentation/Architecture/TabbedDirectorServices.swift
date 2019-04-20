@@ -173,11 +173,11 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
             Log.fatal("No selected VC")
         }
         
-        guard let currentIndex = tabBarViewController.viewControllers?.index(of: currentVC) else {
+        guard let currentIndex = tabBarViewController.viewControllers?.firstIndex(of: currentVC) else {
             Log.fatal("Can't find index of currentVC")
         }
         
-        guard let destinationIndex = tabBarViewController.viewControllers?.index(of: destinationVC) else {
+        guard let destinationIndex = tabBarViewController.viewControllers?.firstIndex(of: destinationVC) else {
             Log.fatal("Can't find index of destVC")
         }
         
