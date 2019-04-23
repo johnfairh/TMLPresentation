@@ -121,6 +121,27 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
+
+    /// Present a model view that is not tied to model stuff
+    public func showModally<PresenterType>(_ newVcIdentifier: String,
+                    model: Model,
+                    presenterFn: NulAckPresenterFn<AppDirectorType, PresenterType>,
+                    done: @escaping () -> Void)
+        where PresenterType: Presenter
+    {
+        let modalVc = loadVc(newVcIdentifier)
+        let modalNavController = UINavigationController(rootViewController: modalVc)
+
+        let presenter = presenterFn(director, model) {[weak self, weak modalVc] in
+            modalVc?.view.endEditing(true)
+            self?.currentViewController.dismiss(animated: true, completion: nil)
+            done()
+        }
+
+        PresenterUI.bind(viewController: modalVc, presenter: presenter)
+
+        currentViewController.present(modalNavController, animated: true, completion: nil)
+    }
     
     /// Present a modal view to create a new object.
     /// The object + model that are given to the presenter are children so can be

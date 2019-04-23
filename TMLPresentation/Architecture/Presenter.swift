@@ -53,6 +53,10 @@ public typealias MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterTyp
 public typealias NulPresenterFn<AppDirectorType, PresenterType> =
     (AppDirectorType, Model) -> PresenterType
 
+/// The signature of a `Presenter.init` that doesn't manage any objects with a callback.
+public typealias NulAckPresenterFn<AppDirectorType, PresenterType> =
+    (AppDirectorType, Model, @escaping () -> Void) -> PresenterType
+
 /// PresenterMode - used as a hint from Director for Presenter/View combinations that serve in
 /// multiple roles.
 public enum PresenterMode {

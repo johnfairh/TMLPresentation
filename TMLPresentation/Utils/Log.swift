@@ -20,7 +20,7 @@ import os
 ///
 
 public protocol LogBuffer {
-    func log(line: String)
+    mutating func log(line: String)
 }
 
 public enum Log {
