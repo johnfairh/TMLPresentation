@@ -30,6 +30,7 @@
 		028F3DAC2105F5530010C41B /* UIKitArtHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */; };
 		028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */; };
 		028F3DAF2105FD400010C41B /* TMLPersistentContainer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */; };
+		02F85F1A227200BE00E34E2C /* TMLError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F19227200BE00E34E2C /* TMLError.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitArtHelpers.swift; sourceTree = "<group>"; };
 		028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitControlHelpers.swift; sourceTree = "<group>"; };
 		028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TMLPersistentContainer.framework; path = Carthage/Build/iOS/TMLPersistentContainer.framework; sourceTree = "<group>"; };
+		02F85F19227200BE00E34E2C /* TMLError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMLError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				028F3D962105F5530010C41B /* FoundationHelpers.swift */,
+				02F85F19227200BE00E34E2C /* TMLError.swift */,
 				02867EB8211F5D93004D3122 /* URLFetcher.swift */,
 				028F3D972105F5530010C41B /* Imports.swift */,
 				028F3D982105F5530010C41B /* Log.swift */,
@@ -231,6 +234,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02F85F1A227200BE00E34E2C /* TMLError.swift in Sources */,
 				028F3D9C2105F5530010C41B /* TableModel.swift in Sources */,
 				028F3DA22105F5530010C41B /* TabbedDirectorServices.swift in Sources */,
 				028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */,

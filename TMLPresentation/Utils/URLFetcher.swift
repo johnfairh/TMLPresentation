@@ -13,12 +13,12 @@ import Foundation
 /// `cancel()` can be called which guarantees no callback will
 /// be made (the transfer may still continue in the background)
 public struct URLFetcher {
-    private var done: (Data?, String?) -> Void
+    private var done: (TMLResult<Data>) -> Void
     private var urlString: String
     private var dataTask: URLSessionDataTask?
     private var requestCancel: Bool
 
-    public init(url: String, done: @escaping (Data?, String?) -> Void ) {
+    public init(url: String, done: @escaping (TMLResult<Data>) -> Void ) {
         self.done = done
         self.urlString = url
         self.requestCancel = false
@@ -28,7 +28,7 @@ public struct URLFetcher {
 
     private mutating func startFetch() {
         guard let url = URL(string: urlString) else {
-            sendDone(error: "URL construction failed \(urlString)")
+            sendDone(.failure(TMLError("URL construction failed \(urlString)")))
             return
         }
         let session = URLSession.shared
@@ -38,9 +38,9 @@ public struct URLFetcher {
 
     private func fetchDone(_ data: Data?, response: URLResponse?, error: Error?) {
         if let data = data {
-            sendDone(data: data)
+            sendDone(.success(data))
         } else {
-            Log.log("Failure fetching image.")
+            Log.log("Failure fetching data.")
             var msg = "Error. "
             if let error = error {
                 msg += "Network error \(error.localizedDescription). "
@@ -48,15 +48,15 @@ public struct URLFetcher {
             if let response = response {
                 msg += "HTTP response \(response)."
             }
-            Log.log("Failure fetching image: \(msg)")
-            sendDone(error: msg)
+            Log.log("Failure fetching data: \(msg)")
+            sendDone(.failure(TMLError(msg)))
         }
     }
 
-    private func sendDone(data: Data? = nil, error: String? = nil) {
+    private func sendDone(_ result: TMLResult<Data>) {
         Dispatch.toForeground {
             if !self.requestCancel {
-                self.done(data, error)
+                self.done(result)
             }
         }
     }
