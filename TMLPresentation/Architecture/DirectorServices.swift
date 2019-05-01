@@ -122,7 +122,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
-    /// Present a model view that is not tied to model stuff
+    /// Modally present a VC that is not tied to model objects
     public func showModally<PresenterType>(_ newVcIdentifier: String,
                     model: Model,
                     presenterFn: NulAckPresenterFn<AppDirectorType, PresenterType>,
@@ -141,6 +141,26 @@ open class DirectorServices<AppDirectorType>: NSObject {
         PresenterUI.bind(viewController: modalVc, presenter: presenter)
 
         currentViewController.present(modalNavController, animated: true, completion: nil)
+    }
+
+    /// Push-present a VC that is not tied to a model object.
+    public func showNormally<PresenterType>(_ newVcIdentifier: String,
+                    model: Model,
+                    presenterFn: NulAckPresenterFn<AppDirectorType, PresenterType>)
+        where PresenterType: Presenter
+    {
+        let viewController = loadVc(newVcIdentifier)
+
+        let presenter = presenterFn(director, model) { [weak viewController] in
+            guard let navController = viewController?.navigationController else {
+                Log.fatal("Not in a nav-controller - can't dismiss this way")
+            }
+            _ = navController.popViewController(animated: true)
+        }
+
+        PresenterUI.bind(viewController: viewController, presenter: presenter)
+
+        currentNavController.pushViewController(viewController, animated: true)
     }
     
     /// Present a modal view to create a new object.
