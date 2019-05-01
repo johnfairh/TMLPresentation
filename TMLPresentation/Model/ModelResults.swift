@@ -29,8 +29,40 @@ public struct ModelResultsSet {
     }
 }
 
+extension NSFetchedResultsController {
+    @objc public func issueFetch() {
+        do {
+            try performFetch()
+        } catch {
+            Log.log("Fetch failed: \(error) - pressing on")
+        }
+    }
+}
+
 extension NSFetchedResultsController where ResultType == NSManagedObject {
     public var asModelResultsSet: ModelResultsSet {
         return ModelResultsSet(results: ["" : self], defaultName: "")
+    }
+}
+
+/// Helper to watch some results outside of a UITableView context, get a
+/// coarse-grained callback when anything changes.
+public final class ModelResultsWatcher<ModelObjectType: ModelObject>: NSObject, NSFetchedResultsControllerDelegate {
+    private let callback: ([ModelObjectType]) -> Void
+    public let modelResults: ModelResults
+    public var objects: [ModelObjectType] {
+        return modelResults.fetchedObjects as? [ModelObjectType] ?? []
+    }
+
+    /// Callback is made after the results have been updated.
+    public init(modelResults: ModelResults, callback: @escaping ([ModelObjectType]) -> Void) {
+        self.callback = callback
+        self.modelResults = modelResults
+        super.init()
+        modelResults.delegate = self
+    }
+
+    public func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        callback(objects)
     }
 }

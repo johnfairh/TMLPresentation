@@ -165,12 +165,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         fetchedResultsController.delegate = self
         
         // Go!
-        do {
-            try fetchedResultsController.performFetch()
-            tableView?.reloadData()
-        } catch {
-            Log.log("Core Data fetch failed - \(error) - pressing on")
-        }
+        fetchedResultsController.issueFetch()
+        tableView?.reloadData()
     }
     
     // Instances of this class come and go, connecting to FRCs which are longer-lived when required.
