@@ -31,6 +31,8 @@
 		028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */; };
 		028F3DAF2105FD400010C41B /* TMLPersistentContainer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */; };
 		02F85F1A227200BE00E34E2C /* TMLError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F19227200BE00E34E2C /* TMLError.swift */; };
+		02F85F6D227C3DE000E34E2C /* PagerPresenterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F6C227C3DE000E34E2C /* PagerPresenterVC.swift */; };
+		02F85F6F227C3E4900E34E2C /* PagerPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F6E227C3E4900E34E2C /* PagerPresenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +62,8 @@
 		028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitControlHelpers.swift; sourceTree = "<group>"; };
 		028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TMLPersistentContainer.framework; path = Carthage/Build/iOS/TMLPersistentContainer.framework; sourceTree = "<group>"; };
 		02F85F19227200BE00E34E2C /* TMLError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMLError.swift; sourceTree = "<group>"; };
+		02F85F6C227C3DE000E34E2C /* PagerPresenterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerPresenterVC.swift; sourceTree = "<group>"; };
+		02F85F6E227C3E4900E34E2C /* PagerPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerPresenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +101,7 @@
 				028F3D8A2105F5530010C41B /* Architecture */,
 				028F3D8F2105F5530010C41B /* Model */,
 				028F3D862105F5530010C41B /* TableView */,
+				02F85F6B227C3D9D00E34E2C /* PageView */,
 				028F3D952105F5530010C41B /* Utils */,
 				028F3D7E2105F5210010C41B /* TMLPresentation.h */,
 				028F3D7F2105F5210010C41B /* Info.plist */,
@@ -152,6 +157,15 @@
 				02130A06210E0A8100410451 /* CoreDataHelpers.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		02F85F6B227C3D9D00E34E2C /* PageView */ = {
+			isa = PBXGroup;
+			children = (
+				02F85F6E227C3E4900E34E2C /* PagerPresenter.swift */,
+				02F85F6C227C3DE000E34E2C /* PagerPresenterVC.swift */,
+			);
+			path = PageView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -238,6 +252,7 @@
 				028F3D9C2105F5530010C41B /* TableModel.swift in Sources */,
 				028F3DA22105F5530010C41B /* TabbedDirectorServices.swift in Sources */,
 				028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */,
+				02F85F6D227C3DE000E34E2C /* PagerPresenterVC.swift in Sources */,
 				028F3DAA2105F5530010C41B /* Log.swift in Sources */,
 				028F3DA92105F5530010C41B /* Imports.swift in Sources */,
 				028F3D9F2105F5530010C41B /* DirectorServices.swift in Sources */,
@@ -247,6 +262,7 @@
 				028F3D9E2105F5530010C41B /* TablePresenterVC.swift in Sources */,
 				028F3DAC2105F5530010C41B /* UIKitArtHelpers.swift in Sources */,
 				028F3DA52105F5530010C41B /* ModelProvider.swift in Sources */,
+				02F85F6F227C3E4900E34E2C /* PagerPresenter.swift in Sources */,
 				028F3DA62105F5530010C41B /* ModelResults.swift in Sources */,
 				028F3DA12105F5530010C41B /* PresenterUI.swift in Sources */,
 				028F3DA02105F5530010C41B /* Presenter.swift in Sources */,

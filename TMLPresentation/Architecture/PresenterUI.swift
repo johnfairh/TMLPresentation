@@ -35,6 +35,13 @@ open class PresentableBasicTableVC<PresenterViewInterface>: UITableViewControlle
     public var presenter: PresenterViewInterface!
 }
 
+/// Base class for page-view controllers with presenters.
+/// See `PresentablePagerVC` for a version with more smarts and common functions.
+open class PresentableBasicPagerVC<PresenterViewInterface>: UIPageViewController, Presentable {
+    public var presenter: PresenterViewInterface!
+}
+
+
 public enum PresenterUI {
     /// Bind a view controller to its presenter.  This just means setting the `presenter` property
     /// on the VC to the presenter.  But getting the types right is a pain.  Most of the ugliness
@@ -47,6 +54,8 @@ public enum PresenterUI {
         if let presentableTableVc = viewController as? PresentableBasicTableVC<PresenterType.ViewInterfaceType> {
             presentableTableVc.presenter = presenterViewInterface
         } else if let presentableVc = viewController as? PresentableVC<PresenterType.ViewInterfaceType> {
+            presentableVc.presenter = presenterViewInterface
+        } else if let presentableVc = viewController as? PresentableBasicPagerVC<PresenterType.ViewInterfaceType> {
             presentableVc.presenter = presenterViewInterface
         } else {
             Log.fatal("Can't figure out presentable type for \(viewController)")

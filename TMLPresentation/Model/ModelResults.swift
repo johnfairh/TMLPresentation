@@ -23,9 +23,13 @@ public struct ModelResultsSet {
     public let defaultName: String
 
     public init(results: NamedModelResults, defaultName: String) {
-        assert(results.index(forKey: defaultName) != nil)
+        Log.assert(results.index(forKey: defaultName) != nil)
         self.resultsSet = results
         self.defaultName = defaultName
+    }
+
+    public var defaultResults: ModelResults {
+        return resultsSet[defaultName]!
     }
 }
 
