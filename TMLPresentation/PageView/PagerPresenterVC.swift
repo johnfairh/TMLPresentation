@@ -26,6 +26,19 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
         layoutPages()
     }
 
+    // Mad workaround :(
+    // Doing this at any earlier (sensible) point gets overridden somewhere
+    // inside UIKit.
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        for subView in view.subviews {
+            if let pageControl = subView as? UIPageControl {
+                pageControl.hidesForSinglePage = true
+                break
+            }
+        }
+    }
+
     var pageViewControllers: [UIViewController] = []
 
     var pageCount: Int {
@@ -40,14 +53,8 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
             return pageVc
         }
 
-        if pageViewControllers.count > 0 {
+        if pageCount > 0 {
             setViewControllers([pageViewControllers[0]], direction: .forward, animated: false)
-            for subView in view.subviews {
-                if let pageControl = subView as? UIPageControl {
-                    pageControl.hidesForSinglePage = true
-                    break
-                }
-            }
         }
     }
 
