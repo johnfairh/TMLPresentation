@@ -37,24 +37,18 @@ import UIKit
 open class DirectorServices<AppDirectorType>: NSObject {
     public let director:   AppDirectorType
     public let window:     UIWindow
-    public let storyboard: UIStoryboard
     
     /// Give services the AppDirectorType token and the main window used to present view controllers
     public init(director: AppDirectorType, window: UIWindow) {
         self.director = director
         self.window   = window
-        
-        guard let storyboard = window.rootViewController?.storyboard else {
-            Log.fatal("Rats, can't get hold of the storyboard")
-        }
-        self.storyboard = storyboard
     }
     
     // MARK: - View Controller helpers
     
     /// Shortcut helper to load a VC from the storyboard
     func loadVc(_ identifier: String) -> UIViewController {
-        return storyboard.instantiateViewController(withIdentifier: identifier)
+        return PresenterUI.loadViewController(id: identifier)
     }
     
     /// Get the current (top, visible) navigation controller.

@@ -61,4 +61,14 @@ public enum PresenterUI {
             Log.fatal("Can't figure out presentable type for \(viewController)")
         }
     }
+
+    /// Load a view controller from the root storyboard
+    public static func loadViewController(id: String) -> UIViewController {
+        guard let window = UIApplication.shared.windows.first,
+            let rootVC = window.rootViewController,
+            let storyboard = rootVC.storyboard else {
+                Log.fatal("Can't locate storyboard")
+        }
+        return storyboard.instantiateViewController(withIdentifier: id)
+    }
 }

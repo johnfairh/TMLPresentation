@@ -7,9 +7,15 @@
 
 import UIKit
 
+/// This is the shared function for a `UIPageViewController` known as a _Pager_ here.
+///
+/// The minimum subclasses have to do is set `pageViewControllerName` during `viewDidLoad()`
+/// Subclasses can implement the delegate but must not provide a datasource - we do that.
+///
 open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
     PresentableBasicPagerVC<PresenterViewInterface>, UIPageViewControllerDataSource {
 
+    /// Subclasses must set this before our `viewDidLoad()` is called.
     open var pageViewControllerName: String!
 
     open override func viewDidLoad() {
@@ -28,7 +34,7 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
 
     func layoutPages() {
         pageViewControllers = (0..<pageCount).map { pageIndex in
-            let pageVc = storyboard!.instantiateViewController(withIdentifier: pageViewControllerName)
+            let pageVc = PresenterUI.loadViewController(id: pageViewControllerName)
             let pagePresenter = presenter.presenterForPage(index: pageIndex)
             PresenterUI.bind(viewController: pageVc, presenter: pagePresenter)
             return pageVc
@@ -67,6 +73,6 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
 
     public func presentationIndex(for pageViewController: UIPageViewController) -> Int {
         Log.log("UIPageViewControllerDataSource.presentationIndex(for:)")
-        return 0 // ??? I don't understand exactly
+        return 0 // Set from presenter somehow, only affects display during setViewControllers()
     }
 }

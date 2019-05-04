@@ -7,6 +7,12 @@
 
 import Foundation
 
+/// Minimal presenter for `UIPageViewController` designed to manage a core
+/// data query with one page per entry, updated dynamically, and the same
+/// (separate) presenter for each page.
+///
+/// Intended to work with `PagerPresenterVC`.
+
 /// Stuff pager VC needs to call in presenter
 public protocol PagerPresenterInterface {
 
@@ -23,7 +29,11 @@ public protocol PagerPresenterInterface {
     var refresh: () -> Void { get set }
 }
 
-/// Generic presenter for pagers
+/// Generic presenter for pagers.
+///
+/// All subclasses have to do is call `init()` providing the constructor for
+/// the per-page presenter.  The page VC is handled in `PagerPresenterVC`.
+///
 open class PagerPresenter<AppDirectorType, ModelObjectType: ModelObject, PagePresenterType: Presenter> {
 
     // The results we are managing with one page per item
