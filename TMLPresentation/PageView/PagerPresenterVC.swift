@@ -10,10 +10,11 @@ import UIKit
 /// This is the shared function for a `UIPageViewController` known as a _Pager_ here.
 ///
 /// The minimum subclasses have to do is set `pageViewControllerName` during `viewDidLoad()`
-/// Subclasses can implement the delegate but must not provide a datasource - we do that.
 ///
 open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
-    PresentableBasicPagerVC<PresenterViewInterface>, UIPageViewControllerDataSource {
+    PresentableBasicPagerVC<PresenterViewInterface>,
+    UIPageViewControllerDataSource,
+    UIPageViewControllerDelegate {
 
     /// Subclasses must set this before our `viewDidLoad()` is called.
     open var pageViewControllerName: String!
@@ -24,6 +25,7 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
         super.viewDidLoad()
         presenter.refresh = { [unowned self] in self.layoutPages() }
         layoutPages()
+        delegate = self
     }
 
     // Mad workaround :(
@@ -45,6 +47,15 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
         return presenter.pageCount
     }
 
+    var pageIndex: Int {
+        get {
+            return presenter.pageIndex
+        }
+        set {
+            presenter.pageIndex = newValue
+        }
+    }
+
     func layoutPages() {
         pageViewControllers = (0..<pageCount).map { pageIndex in
             let pageVc = PresenterUI.loadViewController(id: pageViewControllerName)
@@ -54,7 +65,11 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
         }
 
         if pageCount > 0 {
-            setViewControllers([pageViewControllers[0]], direction: .forward, animated: false)
+            // This part deals with deleting the current page when its index is no longer valid!
+            if pageIndex >= pageCount {
+                presenter.pageIndex = pageCount - 1
+            }
+            setViewControllers([pageViewControllers[pageIndex]], direction: .forward, animated: false)
         }
     }
 
@@ -85,7 +100,16 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
     }
 
     public func presentationIndex(for pageViewController: UIPageViewController) -> Int {
-        Log.log("UIPageViewControllerDataSource.presentationIndex(for:)")
-        return 0 // Set from presenter somehow, only affects display during setViewControllers()
+        return pageIndex
+    }
+
+    // MARK: UIPageViewControllerDelegate
+
+    public func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+        guard let newVc = pendingViewControllers.first,
+            let index = pageViewControllers.firstIndex(of: newVc) else {
+            return
+        }
+        pageIndex = index
     }
 }

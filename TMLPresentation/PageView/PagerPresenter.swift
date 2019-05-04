@@ -19,6 +19,9 @@ public protocol PagerPresenterInterface {
     /// How many pages are there?
     var pageCount: Int { get }
 
+    /// What is the current page?
+    var pageIndex: Int { get set }
+
     /// Type of the presenter for a page [Swift PAT limitation...]
     associatedtype PagePresenter: Presenter
 
@@ -27,6 +30,17 @@ public protocol PagerPresenterInterface {
 
     /// Register for changes to page count
     var refresh: () -> Void { get set }
+}
+
+extension PagerPresenterInterface {
+    /// By default start at the first page; don't persiste anything.
+    public var pageIndex: Int {
+        get {
+            return 0
+        }
+        set {
+        }
+    }
 }
 
 /// Generic presenter for pagers.
@@ -40,8 +54,12 @@ open class PagerPresenter<AppDirectorType, ModelObjectType: ModelObject, PagePre
     private let modelResults: ModelResults
     private var modelResultsWatcher: ModelResultsWatcher<ModelObjectType>!
 
+    public var objects: [ModelObjectType] {
+        return modelResultsWatcher.objects
+    }
+
     // Hooks to the world for generating pages
-    public let director: AppDirectorType
+    public var director: AppDirectorType
     public let model: Model
     public let pagePresenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PagePresenterType>
 
