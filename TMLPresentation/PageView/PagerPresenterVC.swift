@@ -42,6 +42,12 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
 
         if pageViewControllers.count > 0 {
             setViewControllers([pageViewControllers[0]], direction: .forward, animated: false)
+            for subView in view.subviews {
+                if let pageControl = subView as? UIPageControl {
+                    pageControl.hidesForSinglePage = true
+                    break
+                }
+            }
         }
     }
 
