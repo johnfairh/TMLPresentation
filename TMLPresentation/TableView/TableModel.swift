@@ -36,12 +36,18 @@ public protocol TableCell {
 
 /// Structure to describe a leading-edge swipe action
 public struct TableSwipeAction {
-    public let text: String
+    public let shortText: String
+    public let longText: String
     public let color: UIColor?
     public let action: () -> Void
 
     public init(text: String, color: UIColor? = nil, action: @escaping () -> Void) {
-        self.text = text
+        self.init(shortText: text, longText: text, color: color, action: action)
+    }
+
+    public init(shortText: String, longText: String, color: UIColor? = nil, action: @escaping () -> Void) {
+        self.shortText = shortText
+        self.longText = longText
         self.color = color
         self.action = action
     }
@@ -297,7 +303,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         guard let action = delegate?.leadingSwipeActionsForObject(getModelObjectAtIndexPath(indexPath)) else {
             return nil
         }
-        let uiAction = UIContextualAction(style: .normal, title: action.text) { _, _, continuation in
+        let uiAction = UIContextualAction(style: .normal, title: action.shortText) { _, _, continuation in
             action.action()
             continuation(true)
         }
@@ -305,6 +311,36 @@ public final class TableModel<CellType, DelegateType> : NSObject,
             uiAction.backgroundColor = color
         }
         return UISwipeActionsConfiguration(actions: [uiAction])
+    }
+
+    // MARK: - Context Menus
+
+    public func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+
+        let modelObject = getModelObjectAtIndexPath(indexPath)
+
+        var children = [UIAction]()
+
+        if let clientAction = delegate?.leadingSwipeActionsForObject(modelObject) {
+            let action = UIAction(title: clientAction.longText) { _ in
+                clientAction.action()
+            }
+            children.append(action)
+        }
+
+        if delegate?.canDeleteObject(modelObject) ?? false {
+            let deleteAction = UIAction(title: "Delete", attributes: [.destructive]) { [weak self] _ in
+                self?.delegate?.deleteObject(modelObject)
+            }
+            children.append(deleteAction)
+        }
+
+        guard children.count > 0 else {
+            return nil
+        }
+
+        let menu = UIMenu(title: "", children: children)
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in menu }
     }
 
     // MARK: - Move
