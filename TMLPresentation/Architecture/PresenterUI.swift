@@ -25,13 +25,15 @@ public protocol Presentable: class {
 //}
 
 /// Base class for regular view controllers with presenters
-open class PresentableVC<PresenterViewInterface>: UIViewController, Presentable {
+open class PresentableVC<PresenterViewInterface>: UIViewController, Presentable, SwipeDismissable {
+    public var swipeDismisser: NSObject?
     public var presenter: PresenterViewInterface!
 }
 
 /// Base class for table-view controllers with presenters.
 /// See `PresentableTableVC` for a version with more smarts and common functions.
-open class PresentableBasicTableVC<PresenterViewInterface>: UITableViewController, Presentable {
+open class PresentableBasicTableVC<PresenterViewInterface>: UITableViewController, Presentable, SwipeDismissable {
+    public var swipeDismisser: NSObject?
     public var presenter: PresenterViewInterface!
 }
 
@@ -41,7 +43,7 @@ open class PresentableBasicPagerVC<PresenterViewInterface>: UIPageViewController
     public var presenter: PresenterViewInterface!
 }
 
-
+/// Namespace
 public enum PresenterUI {
     /// Bind a view controller to its presenter.  This just means setting the `presenter` property
     /// on the VC to the presenter.  But getting the types right is a pain.  Most of the ugliness
