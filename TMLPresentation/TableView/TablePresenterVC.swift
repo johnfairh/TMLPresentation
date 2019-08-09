@@ -185,6 +185,7 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         //
         searchController.searchBar.delegate = self
         searchController.searchResultsUpdater = self
+        searchController.isModalInPresentation = isModalInPresentation
         navigationItem.searchController = searchController
         definesPresentationContext = true
     }
@@ -196,7 +197,7 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
             let searchController = navigationItem.searchController else {
             return
         }
-        searchController.searchBar.textField.textColor = textColor
+        searchController.searchBar.searchTextField.textColor = textColor
     }
 
     /// Refresh the search when the scope changes

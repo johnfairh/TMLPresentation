@@ -109,16 +109,6 @@ extension UITextField {
     }
 }
 
-// Nasty hack to retrieve the `UITextField` from a `UISearchBar` ...
-extension UISearchBar {
-    public var textField: UITextField {
-        guard let field = self.value(forKey: "_searchField") as? UITextField else {
-            Log.fatal("Undocumented assumption invalidated, ha-ha")
-        }
-        return field
-    }
-}
-
 extension UIViewController {
     /// Pop up simple choice at bottom of screen, report which one is made
     public func presentActionSheetChoice<T>(choices: [String], results: [T], done: @escaping (T?) -> Void) {
