@@ -25,15 +25,13 @@ public protocol Presentable: class {
 //}
 
 /// Base class for regular view controllers with presenters
-open class PresentableVC<PresenterViewInterface>: UIViewController, Presentable, SwipeDismissable {
-    public var swipeDismisser: NSObject?
+open class PresentableVC<PresenterViewInterface>: UIViewController, Presentable {
     public var presenter: PresenterViewInterface!
 }
 
 /// Base class for table-view controllers with presenters.
 /// See `PresentableTableVC` for a version with more smarts and common functions.
-open class PresentableBasicTableVC<PresenterViewInterface>: UITableViewController, Presentable, SwipeDismissable {
-    public var swipeDismisser: NSObject?
+open class PresentableBasicTableVC<PresenterViewInterface>: UITableViewController, Presentable {
     public var presenter: PresenterViewInterface!
 }
 

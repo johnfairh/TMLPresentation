@@ -96,10 +96,9 @@ open class DirectorServices<AppDirectorType>: NSObject {
                     object: ModelObjectType,
                     presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>,
                     done: @escaping (ModelObjectType)->Void)
-        where PresenterType: Presenter, ModelObjectType: ModelObject
+        where PresenterType: EditablePresenter, ModelObjectType: ModelObject
     {
-        let editThingVc        = loadVc(newVcIdentifier)
-        let modalNavController = UINavigationController(rootViewController: editThingVc)
+        let editThingVc = loadVc(newVcIdentifier)
 
         let editModel  = model.createChildModel()
         let editObject = object.convert(editModel)
@@ -113,6 +112,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         PresenterUI.bind(viewController: editThingVc, presenter: presenter)
 
+        let modalNavController = EditableNavController(rootViewController: editThingVc, presenter: presenter)
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
@@ -169,10 +169,9 @@ open class DirectorServices<AppDirectorType>: NSObject {
                     from: ModelObjectType? = nil,
                     presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>,
                     done: @escaping (ModelObjectType)->Void)
-        where PresenterType: Presenter, ModelObjectType: ModelObject
+        where PresenterType: EditablePresenter, ModelObjectType: ModelObject
     {
-        let createThingVc      = loadVc(newVcIdentifier)
-        let modalNavController = UINavigationController(rootViewController: createThingVc)
+        let createThingVc = loadVc(newVcIdentifier)
 
         let editModel = model.createChildModel()
 
@@ -204,6 +203,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         PresenterUI.bind(viewController: createThingVc, presenter: presenter)
 
+        let modalNavController = EditableNavController(rootViewController: createThingVc, presenter: presenter)
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
@@ -230,5 +230,57 @@ open class DirectorServices<AppDirectorType>: NSObject {
         PresenterUI.bind(viewController: newVc, presenter: presenter)
 
         currentNavController.pushViewController(newVc, animated: true)
+    }
+}
+
+/// A wrapped up modal Nav Controller that handles the iOS 13 shenanigans with swipe-to-dismiss
+/// so that scenes can easily take part in edit/save changes/can save flows.
+///
+class EditableNavController<PresenterType: EditablePresenter>: UINavigationController, UIAdaptivePresentationControllerDelegate {
+
+    private let presenter: PresenterType
+
+    init(rootViewController: UIViewController, presenter: PresenterType) {
+        self.presenter = presenter
+        super.init(rootViewController: rootViewController)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        presentationController?.delegate = self
+    }
+
+    /// Should we get in the way when the user tugs down on the modally presented view?
+    func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
+        return !presenter.hasChanges
+    }
+
+    /// Method above said we should get in the way: ask the user what they want to do.
+    func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        if presenter.canSave {
+            alert.addAction(UIAlertAction(title: "Save", style: .default) { _ in
+                self.presenter.save()
+            })
+        }
+
+        alert.addAction(UIAlertAction(title: "Discard Changes", style: .destructive) { _ in
+            self.presenter.cancel()
+        })
+
+        // Do-nothing to leave the session open
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+
+        presentationController.presentedViewController.present(alert, animated: true, completion: nil)
+    }
+
+    /// Swipe to dismiss was not blocked and the dismiss happened.
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        presenter.cancel()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

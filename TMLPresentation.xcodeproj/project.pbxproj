@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		020032C522FDCBBA0010705A /* SwipeDismissal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020032C422FDCBBA0010705A /* SwipeDismissal.swift */; };
 		020825F421246ECC007578C7 /* ModelFieldWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020825F321246ECB007578C7 /* ModelFieldWatcher.swift */; };
 		02130A07210E0A8100410451 /* CoreDataHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02130A06210E0A8100410451 /* CoreDataHelpers.swift */; };
 		02867EB9211F5D93004D3122 /* URLFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02867EB8211F5D93004D3122 /* URLFetcher.swift */; };
@@ -37,7 +36,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		020032C422FDCBBA0010705A /* SwipeDismissal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeDismissal.swift; sourceTree = "<group>"; };
 		020825F321246ECB007578C7 /* ModelFieldWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFieldWatcher.swift; sourceTree = "<group>"; };
 		02130A06210E0A8100410451 /* CoreDataHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataHelpers.swift; sourceTree = "<group>"; };
 		02867EB8211F5D93004D3122 /* URLFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLFetcher.swift; sourceTree = "<group>"; };
@@ -155,7 +153,6 @@
 				028F3D982105F5530010C41B /* Log.swift */,
 				028F3D992105F5530010C41B /* NotificationHelpers.swift */,
 				028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */,
-				020032C422FDCBBA0010705A /* SwipeDismissal.swift */,
 				028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */,
 				02130A06210E0A8100410451 /* CoreDataHelpers.swift */,
 			);
@@ -257,7 +254,6 @@
 				028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */,
 				02F85F6D227C3DE000E34E2C /* PagerPresenterVC.swift in Sources */,
 				028F3DAA2105F5530010C41B /* Log.swift in Sources */,
-				020032C522FDCBBA0010705A /* SwipeDismissal.swift in Sources */,
 				028F3DA92105F5530010C41B /* Imports.swift in Sources */,
 				028F3D9F2105F5530010C41B /* DirectorServices.swift in Sources */,
 				028F3D9D2105F5530010C41B /* TablePresenter.swift in Sources */,

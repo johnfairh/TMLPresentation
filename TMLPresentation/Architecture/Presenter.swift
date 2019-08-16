@@ -41,6 +41,22 @@ extension Presenter {
     public func invoke(with data: InvocationType) {}
 }
 
+/// A type of presenter that edits some kind of Thing and needs to participate in
+/// a standard save/cancel/discard flow, orchestrated at a higher level.
+public protocol EditablePresenter: Presenter {
+    /// Does the Thing have any unsaved changes?
+    var hasChanges: Bool { get }
+
+    /// Is the Thing in a state that is valid for persistence?
+    var canSave: Bool { get }
+
+    /// Save the Thing and end the edit session.
+    func save()
+
+    /// End the edit session immediately.  Discard any changes to the Thing.
+    func cancel()
+}
+
 /// The signature of a `Presenter.init` that manages one object.
 public typealias SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType> =
     (AppDirectorType, Model, ModelObjectType?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
