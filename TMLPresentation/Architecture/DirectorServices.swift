@@ -103,10 +103,15 @@ open class DirectorServices<AppDirectorType>: NSObject {
         let editModel  = model.createChildModel()
         let editObject = object.convert(editModel)
 
-        let presenter = presenterFn(director, editModel, editObject, .single(.edit)) {[weak self, weak editThingVc] _ in
+        let presentingViewController = currentViewController
+
+        let presenter = presenterFn(director, editModel, editObject, .single(.edit)) {
+            [unowned self, unowned editThingVc, unowned presentingViewController] _ in
             Log.log("Director: closing edit view")
-            editThingVc?.view.endEditing(true)
-            self?.currentViewController.dismiss(animated: true, completion: nil)
+            editThingVc.view.endEditing(true)
+            self.currentViewController.dismiss(animated: true, completion: nil)
+            // Clear leftover selection, no 'viewWillAppear' since iOS13 cards thing.
+            presentingViewController.clearTableSelection()
             done(object)
         }
 

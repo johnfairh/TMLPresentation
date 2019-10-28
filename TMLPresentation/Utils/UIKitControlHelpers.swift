@@ -72,6 +72,46 @@ extension UIViewController {
     }
 }
 
+/// Utility to clear selection on a table view somewhere in the hierarchy
+extension UIViewController {
+    /// Hunt down one tableview in the hierarchy and clear its selection
+    public func clearTableSelection() {
+        guard let navVC = self as? UINavigationController,
+            let topVC = navVC.topViewController else {
+            return
+        }
+
+        func searchForTableView(_ view: UIView) -> Bool {
+            if let tableView = view as? UITableView {
+                if tableView.clearSelection() {
+                    return true
+                }
+            }
+
+            for subview in view.subviews {
+                if searchForTableView(subview) {
+                    return true
+                }
+            }
+
+            return false
+        }
+
+        _ = searchForTableView(topVC.view)
+    }
+}
+
+extension UITableView {
+    /// Clear any (single) selection, return if it did anything
+    func clearSelection() -> Bool {
+        guard let selection = indexPathForSelectedRow else {
+            return false
+        }
+        deselectRow(at: selection, animated: true)
+        return true
+    }
+}
+
 extension UITextField {
     /// Attempt to autocomplete some new typing in a `UITextField`
     ///
