@@ -82,7 +82,8 @@ extension UIImage {
 /// Prettify icon views
 extension UIImageView {
     public func enableRoundCorners(width: Int? = nil) {
-        layer.cornerRadius  = 6
+        layer.cornerCurve = .continuous
+        layer.cornerRadius = 6
         layer.masksToBounds = true
         if let width = width {
             layer.borderWidth = CGFloat(width)
@@ -93,6 +94,7 @@ extension UIImageView {
 /// Prettify a view
 extension UIView {
     public func enableBorder() {
+        layer.cornerCurve  = .continuous
         layer.cornerRadius = 6
         layer.borderWidth  = 1
         layer.borderColor  = UIColor.lightGray.cgColor
