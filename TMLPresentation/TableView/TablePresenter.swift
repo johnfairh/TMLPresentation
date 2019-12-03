@@ -126,23 +126,19 @@ open class TablePresenter<AppDirectorType> {
         case delaying_again
     }
 
-    public typealias TablePresenterSearchHandler = (String, Int) -> ModelResultsSet?
+    public typealias TablePresenterSearchHandler = () -> ModelResultsSet?
 
     private var searchDelayState: SearchDelayState = .idle
-    private var searchText = ""
-    private var searchType = 0
     private var searchHandler: TablePresenterSearchHandler?
 
     /// Call from presenter to respond to a search request
-    public func handleSearchUpdate(text: String, type: Int, handler: @escaping TablePresenterSearchHandler) {
+    public func handleSearchUpdate(text: String, handler: @escaping TablePresenterSearchHandler) {
         if text.isEmpty {
             searchDelayState = .idle
             if filteredResults != nil {
                 filteredResults = nil
             }
         } else {
-            searchText = text
-            searchType = type
             searchHandler = handler
 
             switch searchDelayState {
@@ -169,7 +165,7 @@ open class TablePresenter<AppDirectorType> {
             delaySearch()
         case .delaying:
             searchDelayState = .idle
-            filteredResults = searchHandler!(searchText, searchType)
+            filteredResults = searchHandler!()
         }
     }
 }

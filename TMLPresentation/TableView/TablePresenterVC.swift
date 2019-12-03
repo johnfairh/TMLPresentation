@@ -187,7 +187,6 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         searchController.searchResultsUpdater = self
         searchController.isModalInPresentation = isModalInPresentation
         navigationItem.searchController = searchController
-        definesPresentationContext = true
     }
 
     /// The text field in the search bar refuses to respond to color setting in
@@ -203,7 +202,7 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     /// Refresh the search when the scope changes
     public func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
         Dispatch.toForeground {
-            self.updateSearchResults()
+            self.refreshSearch()
         }
     }
 
@@ -215,15 +214,35 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     /// Pull out the essentials and call out to subclass
     public func updateSearchResults(for searchController: UISearchController) {
         let searchBar = searchController.searchBar
-        let text = searchBar.text ?? ""
-        updateTableForSearch(text: text, scopeIndex: searchBar.selectedScopeButtonIndex)
+        let text = searchBar.searchTextField.text ?? ""
+        let tokens = searchBar.searchTextField.tokens
+        updateTableForSearch(tokens: tokens, text: text, scopeIndex: searchBar.selectedScopeButtonIndex)
     }
 
-    /// Helper for subclasses to call to refresh the search after the search
-    /// text has been manually changed.
-    public func updateSearchResults() {
+    /// Allow subclasses to refresh the current search - corner cases where the text gets editted or
+    /// token meaning changes or something.
+    public func refreshSearch() {
+        guard let searchController = navigationItem.searchController else {
+            Log.fatal("Lost the searchcontroller")
+        }
         refreshSearchBarColors()
-        updateSearchResults(for: self.navigationItem.searchController!)
+        updateSearchResults(for: searchController)
+    }
+
+    /// Allow subclasses to invoke search programatically
+    public func invokeSearch(tokens: [UISearchToken] = [],
+                             text: String = "",
+                             scopeIndex: Int? = nil) {
+        guard let searchController = navigationItem.searchController else {
+            Log.fatal("Lost the searchcontroller")
+        }
+        searchController.isActive = true
+        searchController.searchBar.searchTextField.tokens = tokens
+        searchController.searchBar.searchTextField.text = text
+        if let scopeIndex = scopeIndex {
+            searchController.searchBar.selectedScopeButtonIndex = scopeIndex
+        }
+        refreshSearch()
     }
 
     /// Provide this one so subclasses can override it
@@ -232,6 +251,7 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     }
 
     /// Override to implement a search
-    open func updateTableForSearch(text: String, scopeIndex: Int) {
+    open func updateTableForSearch(tokens: [UISearchToken], text: String, scopeIndex: Int) {
+        Log.fatal("Override this to do a search")
     }
 }
