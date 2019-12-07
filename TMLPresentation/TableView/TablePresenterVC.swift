@@ -160,17 +160,13 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
 
     // MARK: - Search
 
-    private var searchTextColor: UIColor?
-
     /// Call during `viewDidLoad` to enable a search controller.
     /// `updateTableForSearch` is called when anything changes in the searchbar.
-    public func enableSearch(scopes: [String], textColor: UIColor? = nil) {
+    public func enableSearch(scopes: [String]) {
         let searchController = UISearchController(searchResultsController: nil)
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.scopeButtonTitles = scopes
-
-        searchTextColor = textColor
 
         // VERY IMPORTANT TO NOT SET `showsScopeBar`
         //
@@ -189,26 +185,11 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         navigationItem.searchController = searchController
     }
 
-    /// The text field in the search bar refuses to respond to color setting in
-    /// the normal ways, so we have to fish it out and poke it at various times.
-    private func refreshSearchBarColors() {
-        guard let textColor = searchTextColor,
-            let searchController = navigationItem.searchController else {
-            return
-        }
-        searchController.searchBar.searchTextField.textColor = textColor
-    }
-
     /// Refresh the search when the scope changes
     public func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
         Dispatch.toForeground {
             self.refreshSearch()
         }
-    }
-
-    /// Resort the color when it gets focus
-    public func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        refreshSearchBarColors()
     }
 
     /// Pull out the essentials and call out to subclass
@@ -225,7 +206,6 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
         guard let searchController = navigationItem.searchController else {
             Log.fatal("Lost the searchcontroller")
         }
-        refreshSearchBarColors()
         updateSearchResults(for: searchController)
     }
 
