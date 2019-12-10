@@ -103,7 +103,8 @@ extension UIViewController {
 
 extension UITableView {
     /// Clear any (single) selection, return if it did anything
-    func clearSelection() -> Bool {
+    @discardableResult
+    public func clearSelection() -> Bool {
         guard let selection = indexPathForSelectedRow else {
             return false
         }
