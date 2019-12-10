@@ -263,6 +263,7 @@ class EditableNavController<PresenterType: EditablePresenter>: UINavigationContr
     /// Method above said we should get in the way: ask the user what they want to do.
     func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alert.view.tintColor = navigationBar.tintColor
 
         if presenter.canSave {
             alert.addAction(UIAlertAction(title: "Save", style: .default) { _ in
