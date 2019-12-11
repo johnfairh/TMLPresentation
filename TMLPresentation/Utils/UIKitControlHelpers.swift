@@ -154,6 +154,7 @@ extension UIViewController {
     /// Pop up simple choice at bottom of screen, report which one is made
     public func presentActionSheetChoice<T>(choices: [String], results: [T], done: @escaping (T?) -> Void) {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        navigationController.flatMap { alert.view.tintColor = $0.navigationBar.tintColor }
         for (index, choice) in choices.enumerated() {
             alert.addAction(UIAlertAction(title: choice, style: .default) {_ in done(results[index]) })
         }
