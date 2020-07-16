@@ -41,6 +41,11 @@ open class PresentableBasicPagerVC<PresenterViewInterface>: UIPageViewController
     public var presenter: PresenterViewInterface!
 }
 
+/// Base class for collection-view controllers with presenters.
+open class PresentableBasicCollectionVC<PresenterViewInterface>: UICollectionViewController, Presentable {
+    public var presenter: PresenterViewInterface!
+}
+
 /// Namespace
 public enum PresenterUI {
     /// Bind a view controller to its presenter.  This just means setting the `presenter` property
@@ -56,6 +61,8 @@ public enum PresenterUI {
         } else if let presentableVc = viewController as? PresentableVC<PresenterType.ViewInterfaceType> {
             presentableVc.presenter = presenterViewInterface
         } else if let presentableVc = viewController as? PresentableBasicPagerVC<PresenterType.ViewInterfaceType> {
+            presentableVc.presenter = presenterViewInterface
+        } else if let presentableVc = viewController as? PresentableBasicCollectionVC<PresenterType.ViewInterfaceType> {
             presentableVc.presenter = presenterViewInterface
         } else {
             Log.fatal("Can't figure out presentable type for \(viewController)")
