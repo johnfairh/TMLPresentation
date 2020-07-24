@@ -12,12 +12,15 @@ import UIKit
 /// but evolved under all my own horrible hard-coded ways...
 extension UIImage {
 
+    // This all needs sanitizing!
+
     public static var badgeColor: UIColor?
+    public static var badgeFont: UIFont?
 
     private func addTextBadge(_ size: CGSize, text: String) {
         let nsString = NSString(string: text)
 
-        let font = UIFont(name: "AvenirNext-Bold", size: 18)!
+        let font = UIImage.badgeFont ?? UIFont(name: "AvenirNext-Bold", size: 18)!
 
         var attrs: [NSAttributedString.Key: Any] =
             [ NSAttributedString.Key.font: font,
