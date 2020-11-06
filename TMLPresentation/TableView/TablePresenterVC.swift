@@ -156,6 +156,10 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     func refreshTriggered() {
         refreshControl?.endRefreshing()
         presenter.createNewObject()
+        Dispatch.toForeground {
+            self.tableView.beginUpdates()
+            self.tableView.endUpdates()
+        }
     }
 
     // MARK: - Search
