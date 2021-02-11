@@ -7,7 +7,7 @@
 
 import UIKit
 
-public protocol Presentable: class {
+public protocol Presentable: AnyObject {
     associatedtype PresenterViewInterface
     var presenter: PresenterViewInterface! { get set }
 }

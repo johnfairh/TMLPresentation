@@ -59,7 +59,7 @@ public struct TableSwipeAction {
 /// Routines to be optionally implemented to give scene-specific behaviour on a model
 /// object perspective when table actions happen.
 ///
-public protocol TableModelDelegate: class {
+public protocol TableModelDelegate: AnyObject {
     associatedtype ModelType
     associatedtype SectionType
 

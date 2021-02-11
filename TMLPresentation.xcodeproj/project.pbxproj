@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -29,7 +29,7 @@
 		028F3DAB2105F5530010C41B /* NotificationHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D992105F5530010C41B /* NotificationHelpers.swift */; };
 		028F3DAC2105F5530010C41B /* UIKitArtHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */; };
 		028F3DAD2105F5530010C41B /* UIKitControlHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */; };
-		028F3DAF2105FD400010C41B /* TMLPersistentContainer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */; };
+		02E3BD8525D53960005E6C8F /* TMLPersistentContainer in Frameworks */ = {isa = PBXBuildFile; productRef = 02E3BD8425D53960005E6C8F /* TMLPersistentContainer */; };
 		02F85F1A227200BE00E34E2C /* TMLError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F19227200BE00E34E2C /* TMLError.swift */; };
 		02F85F6D227C3DE000E34E2C /* PagerPresenterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F6C227C3DE000E34E2C /* PagerPresenterVC.swift */; };
 		02F85F6F227C3E4900E34E2C /* PagerPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F85F6E227C3E4900E34E2C /* PagerPresenter.swift */; };
@@ -60,7 +60,6 @@
 		028F3D992105F5530010C41B /* NotificationHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationHelpers.swift; sourceTree = "<group>"; };
 		028F3D9A2105F5530010C41B /* UIKitArtHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitArtHelpers.swift; sourceTree = "<group>"; };
 		028F3D9B2105F5530010C41B /* UIKitControlHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIKitControlHelpers.swift; sourceTree = "<group>"; };
-		028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TMLPersistentContainer.framework; path = Carthage/Build/iOS/TMLPersistentContainer.framework; sourceTree = "<group>"; };
 		02F85F19227200BE00E34E2C /* TMLError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMLError.swift; sourceTree = "<group>"; };
 		02F85F6C227C3DE000E34E2C /* PagerPresenterVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerPresenterVC.swift; sourceTree = "<group>"; };
 		02F85F6E227C3E4900E34E2C /* PagerPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagerPresenter.swift; sourceTree = "<group>"; };
@@ -71,7 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				028F3DAF2105FD400010C41B /* TMLPersistentContainer.framework in Frameworks */,
+				02E3BD8525D53960005E6C8F /* TMLPersistentContainer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +82,6 @@
 			children = (
 				028F3D7D2105F5210010C41B /* TMLPresentation */,
 				028F3D7C2105F5210010C41B /* Products */,
-				028F3DAE2105FD400010C41B /* TMLPersistentContainer.framework */,
 			);
 			sourceTree = "<group>";
 		};
@@ -196,6 +194,9 @@
 			dependencies = (
 			);
 			name = TMLPresentation;
+			packageProductDependencies = (
+				02E3BD8425D53960005E6C8F /* TMLPersistentContainer */,
+			);
 			productName = TMLPresentation;
 			productReference = 028F3D7B2105F5210010C41B /* TMLPresentation.framework */;
 			productType = "com.apple.product-type.framework";
@@ -224,6 +225,9 @@
 				Base,
 			);
 			mainGroup = 028F3D712105F5210010C41B;
+			packageReferences = (
+				02E3BD8325D53960005E6C8F /* XCRemoteSwiftPackageReference "TMLPersistentContainer" */,
+			);
 			productRefGroup = 028F3D7C2105F5210010C41B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -484,6 +488,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		02E3BD8325D53960005E6C8F /* XCRemoteSwiftPackageReference "TMLPersistentContainer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/johnfairh/TMLPersistentContainer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		02E3BD8425D53960005E6C8F /* TMLPersistentContainer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 02E3BD8325D53960005E6C8F /* XCRemoteSwiftPackageReference "TMLPersistentContainer" */;
+			productName = TMLPersistentContainer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 028F3D722105F5210010C41B /* Project object */;
 }
