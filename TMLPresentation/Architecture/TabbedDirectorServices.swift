@@ -229,4 +229,12 @@ open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirector
         }
         barItem.badgeValue = badge
     }
+
+    public func setTabImage(tab: Int, image: UIImage) {
+        guard let viewController = tabBarViewController.viewControllers?[tab] else {
+            Log.fatal("No VC for tab \(tab)")
+        }
+        viewController.tabBarItem.image = image
+        //            UIImage(systemName: "list.bullet.rectangle")!.withBaselineOffset(fromBottom: 7)
+    }
 }
