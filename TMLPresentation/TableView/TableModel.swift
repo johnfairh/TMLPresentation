@@ -269,7 +269,8 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         }
         let modelObject = getModelObjectAtIndexPath(indexPath)
         return delegate.canDeleteObject(modelObject) ||
-               delegate.canMoveObject(modelObject)
+               delegate.canMoveObject(modelObject) ||
+               delegate.leadingSwipeActionsForObject(modelObject) != nil
     }
 
     public func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
