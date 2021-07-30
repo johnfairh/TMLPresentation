@@ -168,6 +168,7 @@ public final class TableModel<CellType, DelegateType> : NSObject,
         tableView?.dragDelegate = self
         tableView?.dropDelegate = self
         tableView?.dragInteractionEnabled = true
+        tableView?.sectionHeaderTopPadding = 0
         fetchedResultsController.delegate = self
         
         // Go!
