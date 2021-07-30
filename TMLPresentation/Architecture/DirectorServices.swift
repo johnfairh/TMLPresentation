@@ -34,6 +34,7 @@ import UIKit
 ///
 /// TODO: Make this actually work without the tab subclass!
 ///
+@MainActor
 open class DirectorServices<AppDirectorType>: NSObject {
     public let director:   AppDirectorType
     public let window:     UIWindow

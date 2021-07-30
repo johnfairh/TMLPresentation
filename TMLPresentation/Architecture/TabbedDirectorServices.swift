@@ -12,6 +12,7 @@ import UIKit
 /// TabbedDirectorServices -- use for managing a UI based in a tab controller
 /// with each tab having a nav controller.
 ///
+@MainActor
 open class TabbedDirectorServices<AppDirectorType>: DirectorServices<AppDirectorType>, UITabBarControllerDelegate {
     private var tabBarViewController: UITabBarController!
     private var initialTabIndex: Int?
