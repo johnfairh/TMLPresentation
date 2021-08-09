@@ -71,9 +71,11 @@ public enum PresenterUI {
 
     /// Load a view controller from the root storyboard
     public static func loadViewController(id: String) -> UIViewController {
-        guard let window = UIApplication.shared.windows.first,
-            let rootVC = window.rootViewController,
-            let storyboard = rootVC.storyboard else {
+        guard case let scenes = UIApplication.shared.connectedScenes,
+              let scene = scenes.first as? UIWindowScene,
+              let window = scene.windows.first,
+              let rootVC = window.rootViewController,
+              let storyboard = rootVC.storyboard else {
                 Log.fatal("Can't locate storyboard")
         }
         return storyboard.instantiateViewController(withIdentifier: id)
