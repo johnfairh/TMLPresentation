@@ -18,6 +18,7 @@
 /// The XxxPresenter class should be unit-testable without UI.  It is instantiated via DirectorServices
 /// typically from a routine in the App's Director using the init routine from the Presenter protocol.
 ///
+@MainActor
 public protocol Presenter {
     associatedtype AppDirectorType
     associatedtype ModelType
@@ -43,6 +44,7 @@ extension Presenter {
 
 /// A type of presenter that edits some kind of Thing and needs to participate in
 /// a standard save/cancel/discard flow, orchestrated at a higher level.
+@MainActor
 public protocol EditablePresenter: Presenter {
     /// Does the Thing have any unsaved changes?
     var hasChanges: Bool { get }
@@ -59,19 +61,19 @@ public protocol EditablePresenter: Presenter {
 
 /// The signature of a `Presenter.init` that manages one object.
 public typealias SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType> =
-    (AppDirectorType, Model, ModelObjectType?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
+    @MainActor (AppDirectorType, Model, ModelObjectType?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
 
 /// The signature of a `Presenter.init` that manages multiple objects.
 public typealias MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType> =
-    (AppDirectorType, Model, ModelResultsSet?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
+    @MainActor (AppDirectorType, Model, ModelResultsSet?, PresenterMode, @escaping PresenterDone<ModelObjectType>) -> PresenterType
 
 /// The signature of a `Presenter.init` that doesn't manage any objects.
 public typealias NulPresenterFn<AppDirectorType, PresenterType> =
-    (AppDirectorType, Model) -> PresenterType
+    @MainActor (AppDirectorType, Model) -> PresenterType
 
 /// The signature of a `Presenter.init` that doesn't manage any objects with a callback.
 public typealias NulAckPresenterFn<AppDirectorType, PresenterType> =
-    (AppDirectorType, Model, @escaping () -> Void) -> PresenterType
+    @MainActor (AppDirectorType, Model, @escaping () -> Void) -> PresenterType
 
 /// PresenterMode - used as a hint from Director for Presenter/View combinations that serve in
 /// multiple roles.

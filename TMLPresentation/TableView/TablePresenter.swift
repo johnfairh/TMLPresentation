@@ -24,6 +24,7 @@
 ///
 /// Works with `PresentableTableVC` on the UI side.
 ///
+@MainActor
 public protocol TablePresenterInterface {
     /// (input) The name of the currently displayed query
     var currentResultsName: String { get set }
@@ -48,6 +49,7 @@ public extension TablePresenterInterface {
 
 /// Common implementation of a presenter for a table view.
 ///
+@MainActor
 open class TablePresenter<AppDirectorType> {
     // Properties for our implementation
     private var mode:         PresenterMode.Multi
@@ -154,18 +156,17 @@ open class TablePresenter<AppDirectorType> {
 
     func delaySearch() {
         searchDelayState = .delaying
-        Dispatch.toForegroundAfter(milliseconds: 150, block: updateSearchResultsDelayed)
-    }
-
-    func updateSearchResultsDelayed() {
-        switch searchDelayState {
-        case .idle:
-            break
-        case .delaying_again:
-            delaySearch()
-        case .delaying:
-            searchDelayState = .idle
-            filteredResults = searchHandler!()
+        Task {
+            try? await Task.sleep(nanoseconds: 150 * 1000)
+            switch searchDelayState {
+            case .idle:
+                break
+            case .delaying_again:
+                delaySearch()
+            case .delaying:
+                searchDelayState = .idle
+                filteredResults = searchHandler!()
+            }
         }
     }
 }

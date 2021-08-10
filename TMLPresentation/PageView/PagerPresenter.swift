@@ -14,8 +14,8 @@ import Foundation
 /// Intended to work with `PagerPresenterVC`.
 
 /// Stuff pager VC needs to call in presenter
+@MainActor
 public protocol PagerPresenterInterface {
-
     /// How many pages are there?
     var pageCount: Int { get }
 
@@ -48,8 +48,8 @@ extension PagerPresenterInterface {
 /// All subclasses have to do is call `init()` providing the constructor for
 /// the per-page presenter.  The page VC is handled in `PagerPresenterVC`.
 ///
+@MainActor
 open class PagerPresenter<AppDirectorType, ModelObjectType: ModelObject, PagePresenterType: Presenter> {
-
     // The results we are managing with one page per item
     private let modelResults: ModelResults
     private var modelResultsWatcher: ModelResultsWatcher<ModelObjectType>!
