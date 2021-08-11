@@ -122,6 +122,19 @@ open class DirectorServices<AppDirectorType>: NSObject {
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
+    public func editThing<PresenterType,ModelObjectType>(_ newVcIdentifier: String,
+                    model: Model,
+                    object: ModelObjectType,
+                    presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async
+        where PresenterType: EditablePresenter, ModelObjectType: ModelObject
+    {
+        await withCheckedContinuation { continuation in
+            editThing(newVcIdentifier, model: model, object: object, presenterFn: presenterFn) { _ in
+                continuation.resume()
+            }
+        }
+    }
+
     /// Modally present a VC that is not tied to model objects
     public func showModally<PresenterType>(_ newVcIdentifier: String,
                     model: Model,
@@ -141,6 +154,18 @@ open class DirectorServices<AppDirectorType>: NSObject {
         PresenterUI.bind(viewController: modalVc, presenter: presenter)
 
         currentViewController.present(modalNavController, animated: true, completion: nil)
+    }
+
+    public func showModally<PresenterType>(_ newVcIdentifier: String,
+                    model: Model,
+                    presenterFn: NulAckPresenterFn<AppDirectorType, PresenterType>) async
+        where PresenterType: Presenter
+    {
+        await withCheckedContinuation { continuation in
+            showModally(newVcIdentifier, model: model, presenterFn: presenterFn) {
+                continuation.resume()
+            }
+        }
     }
 
     /// Push-present a VC that is not tied to a model object.
@@ -213,6 +238,19 @@ open class DirectorServices<AppDirectorType>: NSObject {
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
+    public func createThing<PresenterType,ModelObjectType>(_ newVcIdentifier: String,
+                    model: Model,
+                    from: ModelObjectType? = nil,
+                    presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async -> ModelObjectType
+        where PresenterType: EditablePresenter, ModelObjectType: ModelObject
+    {
+        await withCheckedContinuation { continuation in
+            createThing(newVcIdentifier, model: model, from: from, presenterFn: presenterFn) {
+                continuation.resume(returning: $0)
+            }
+        }
+    }
+
     /// Push a table view onto the current navigation stack to let the user pick an object.
     /// The default table contents are according to the particular presenter but can be
     /// overridden using the 'results' parameter.
@@ -236,6 +274,18 @@ open class DirectorServices<AppDirectorType>: NSObject {
         PresenterUI.bind(viewController: newVc, presenter: presenter)
 
         currentNavController.pushViewController(newVc, animated: true)
+    }
+
+    public func pickThing<ModelObjectType, PresenterType>(_ newVcIdentifier: String,
+                   model: Model,
+                   results: ModelResults,
+                   presenterFn: MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async -> ModelObjectType
+        where ModelObjectType: ModelObject, PresenterType: Presenter {
+        await withCheckedContinuation { continuation in
+            pickThing(newVcIdentifier, model: model, results: results, presenterFn: presenterFn) {
+                continuation.resume(returning: $0)
+            }
+        }
     }
 }
 

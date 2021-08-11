@@ -157,7 +157,7 @@ open class TablePresenter<AppDirectorType> {
     func delaySearch() {
         searchDelayState = .delaying
         Task {
-            try? await Task.sleep(nanoseconds: 150 * 1000)
+            try? await Task.sleep(nanoseconds: 150 * 1000 * 1000)
             switch searchDelayState {
             case .idle:
                 break
