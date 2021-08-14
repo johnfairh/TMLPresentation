@@ -13,56 +13,30 @@ import Foundation
 /// `cancel()` can be called which guarantees no callback will
 /// be made (the transfer may still continue in the background)
 public struct URLFetcher {
-    private var done: (TMLResult<Data>) -> Void
     private var urlString: String
-    private var dataTask: URLSessionDataTask?
-    private var requestCancel: Bool
 
-    public init(url: String, done: @escaping (TMLResult<Data>) -> Void ) {
-        self.done = done
+    public init(url: String) {
         self.urlString = url
-        self.requestCancel = false
-
-        startFetch()
     }
 
-    private mutating func startFetch() {
+    public func fetch() async throws -> Data {
         guard let url = URL(string: urlString) else {
-            sendDone(.failure(TMLError("URL construction failed \(urlString)")))
-            return
+            throw TMLError("URL construction failed \(urlString)")
         }
         let session = URLSession.shared
-        dataTask = session.dataTask(with: url, completionHandler: fetchDone)
-        dataTask!.resume()
-    }
-
-    private func fetchDone(_ data: Data?, response: URLResponse?, error: Error?) {
-        if let data = data {
-            sendDone(.success(data))
-        } else {
-            Log.log("Failure fetching data.")
-            var msg = "Error. "
-            if let error = error {
-                msg += "Network error \(error.localizedDescription). "
+        do {
+            let (data, response) = try await session.data(from: url)
+            guard let httpResp = response as? HTTPURLResponse else {
+                throw TMLError("Bad response type: \(response)")
             }
-            if let response = response {
-                msg += "HTTP response \(response)."
+            guard httpResp.statusCode == 200 else {
+                throw TMLError("Bad HTTP status: \(httpResp)")
             }
+            return data
+        } catch {
+            let msg = "Network error \(error.localizedDescription). "
             Log.log("Failure fetching data: \(msg)")
-            sendDone(.failure(TMLError(msg)))
+            throw TMLError(msg)
         }
-    }
-
-    private func sendDone(_ result: TMLResult<Data>) {
-        Dispatch.toForeground {
-            if !self.requestCancel {
-                self.done(result)
-            }
-        }
-    }
-
-    public mutating func cancel() {
-        Log.assert(!requestCancel)
-        requestCancel = true
     }
 }
