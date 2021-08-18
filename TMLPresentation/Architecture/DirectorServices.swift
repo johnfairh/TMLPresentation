@@ -192,14 +192,12 @@ open class DirectorServices<AppDirectorType>: NSObject {
     /// The object + model that are given to the presenter are children so can be
     /// editted freely without affecting the parent model.
     /// If the creation is successful then the done callback is made with the new object.
-    /// If the user abandons the creation then no callback is made, the view is just
-    /// dismissed.
-    /// [this works fine in our use cases, should perhaps be more general though]
+    /// If the user abandons the creation then the done callback is made with`nil`.
     public func createThing<PresenterType,ModelObjectType>(_ newVcIdentifier: String,
                     model: Model,
                     from: ModelObjectType? = nil,
                     presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>,
-                    done: @escaping (ModelObjectType)->Void)
+                    done: @escaping (ModelObjectType?)->Void)
         where PresenterType: EditablePresenter, ModelObjectType: ModelObject
     {
         let createThingVc = loadVc(newVcIdentifier)
@@ -223,7 +221,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
             guard let object = object else {
                 Log.log("Director: object create view abandoned")
-                // NO CALLBACK
+                done(nil)
                 return
             }
 
@@ -241,7 +239,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
     public func createThing<PresenterType,ModelObjectType>(_ newVcIdentifier: String,
                     model: Model,
                     from: ModelObjectType? = nil,
-                    presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async -> ModelObjectType
+                    presenterFn: SinglePresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async -> ModelObjectType?
         where PresenterType: EditablePresenter, ModelObjectType: ModelObject
     {
         await withCheckedContinuation { continuation in
