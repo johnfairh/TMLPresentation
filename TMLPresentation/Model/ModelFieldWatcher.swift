@@ -18,6 +18,9 @@
 // will just go out of sync used in other contexts or if we get lazier
 // about saving the root.
 //
+// This can't quite be a simple map from 'context-saved' to 'results' because
+// we need a value up-front eagerly available without having to wait for a
+// change.
 
 /// A type for the query the delegate is required to build
 public typealias ModelFieldFetchRequest = NSFetchRequest<NSDictionary>
@@ -25,48 +28,58 @@ public typealias ModelFieldFetchRequest = NSFetchRequest<NSDictionary>
 /// A type for the results of a field fetch request
 public typealias ModelFieldResults = [[String : AnyObject]]
 
-/// The callback of the `ModelFieldWatcher` receives query results on the foreground queue.
-public typealias ModelFieldWatcherCallback = (ModelFieldResults) -> Void
+/// Wrapper sequence for field-watching.  Use `Model.fieldResultsSequence(...)` to create.
+public struct ModelFieldResultsSequence: AsyncSequence {
+    public typealias AsyncIterator = Iterator
+    public typealias Element = ModelFieldResults
 
-/// A `ModelFieldWatcher` watches the root context and refreshes the results
-/// of a field-based query when necessary.
-public final class ModelFieldWatcher {
-    private let bgModel: Model
     private let fetchRequest: ModelFieldFetchRequest
-    private var listener: NotificationListener?
+    private let baseModel: Model
 
-    /// Create a new `ModelFieldWatcher`.  Nothing happens until `delegate` is set.
-    /// The passed-in `baseModel` is used as reference, the fetches occur on a new
-    /// background-thread-context model that is forked from this base.
-    init(baseModel: Model, fetchRequest: ModelFieldFetchRequest) {
-        self.bgModel = baseModel.createChildModel(background: true)
+    init(model: Model, fetchRequest: ModelFieldFetchRequest) {
         self.fetchRequest = fetchRequest
-        self.listener = nil
-        self.listener = baseModel.createListener(name: .NSManagedObjectContextDidSave) {
-            [weak self] _ in self?.refresh()
-        }
+        self.baseModel = model
     }
 
-    /// Set the watcher's callback.  Setting this field causes the query to run
-    /// for the first time and results to start being reported.
-    public var callback: ModelFieldWatcherCallback? {
-        didSet {
-            if callback != nil {
-                refresh()
+    public func makeAsyncIterator() -> Iterator {
+        Iterator(self)
+    }
+
+    public final class Iterator: AsyncIteratorProtocol {
+        private let seq: ModelFieldResultsSequence
+        private let bgModel: Model
+        private var sentFirst: Bool
+        private var rest: AsyncMapSequence<NotificationCenter.Notifications, ModelFieldResults>.AsyncIterator!
+
+        init(_ seq: ModelFieldResultsSequence) {
+            self.seq = seq
+            self.bgModel = seq.baseModel.createChildModel(background: true)
+            self.sentFirst = false
+            self.rest = nil
+            self.rest = seq.baseModel.notifications(name: .NSManagedObjectContextDidSave).map { _ in
+                await self.query()
+            }.makeAsyncIterator()
+        }
+
+        public func next() async -> ModelFieldResults? {
+            guard !Task.isCancelled else {
+                return nil
             }
+
+            guard sentFirst else {
+                sentFirst = true
+                return await query()
+            }
+
+            return await rest.next()
         }
-    }
 
-    deinit {
-        listener?.stopListening()
-        listener = nil
-    }
-
-    private func refresh() {
-        bgModel.perform { model in
-            let results = model.createFieldResults(fetchRequest: self.fetchRequest)
-            Dispatch.toForeground {
-                self.callback?(results)
+        private func query() async -> ModelFieldResults {
+            await withCheckedContinuation { continuation in
+                bgModel.perform { model in
+                    let results = model.createFieldResults(fetchRequest: self.seq.fetchRequest)
+                    continuation.resume(returning: results)
+                }
             }
         }
     }

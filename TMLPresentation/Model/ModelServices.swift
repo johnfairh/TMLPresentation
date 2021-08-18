@@ -73,11 +73,11 @@ open class ModelServices: Model {
         return []
     }
 
-    /// Create an object to watch fields changing
-    public func createFieldWatcher(fetchRequest: ModelFieldFetchRequest) -> ModelFieldWatcher {
-        return ModelFieldWatcher(baseModel: self, fetchRequest: fetchRequest)
+    /// Generate an `AsyncSequence` of `ModelFieldResults`
+    public func fieldResultsSequence(_ fetchRequest: ModelFieldFetchRequest) -> ModelFieldResultsSequence {
+        ModelFieldResultsSequence(model: self, fetchRequest: fetchRequest)
     }
-    
+
     // MARK: - Simple object routines
     
     /// Create a new instance of a ModelObject
@@ -296,6 +296,11 @@ open class ModelServices: Model {
     /// Create a notification listener, set up in listening state.
     public func createListener(name: NSNotification.Name,
                                callback: @escaping NotificationListener.Callback) -> NotificationListener {
-        return NotificationListener(name: name, from: managedObjectContext, callback: callback)
+        NotificationListener(name: name, from: managedObjectContext, callback: callback)
+    }
+
+    /// Get the async sequence for a particular notification
+    public func notifications(name: NSNotification.Name) -> NotificationCenter.Notifications {
+        NotificationCenter.default.notifications(named: name, object: managedObjectContext)
     }
 }

@@ -58,8 +58,8 @@ public protocol Model {
     /// Run a fetch for field data
     func createFieldResults(fetchRequest: ModelFieldFetchRequest) -> ModelFieldResults
 
-    /// Set up a live object that notifies when the fields change
-    func createFieldWatcher(fetchRequest: ModelFieldFetchRequest) -> ModelFieldWatcher
+    /// Generate an `AsyncSequence` of `ModelFieldResults` that updates  whenever the data changes
+    func fieldResultsSequence(_ fetchRequest: ModelFieldFetchRequest) -> ModelFieldResultsSequence
 
     /// Clone a fetched-results-controller but with a different predicate
     func cloneResults(_ results: ModelResults, withPredicate predicate: NSPredicate) -> ModelResults
@@ -80,6 +80,7 @@ public protocol Model {
 
     // MARK: - Notifications
     func createListener(name: NSNotification.Name, callback: @escaping NotificationListener.Callback) -> NotificationListener
+    func notifications(name: NSNotification.Name) -> NotificationCenter.Notifications
 }
 
 ///
