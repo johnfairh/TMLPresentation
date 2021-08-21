@@ -143,7 +143,6 @@ open class DirectorServices<AppDirectorType>: NSObject {
         where PresenterType: Presenter
     {
         let modalVc = loadVc(newVcIdentifier)
-        let modalNavController = UINavigationController(rootViewController: modalVc)
 
         let presenter = presenterFn(director, model) {[weak self, weak modalVc] in
             modalVc?.view.endEditing(true)
@@ -153,6 +152,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
 
         PresenterUI.bind(viewController: modalVc, presenter: presenter)
 
+        let modalNavController = ObservingNavController(rootViewController: modalVc, done: done)
         currentViewController.present(modalNavController, animated: true, completion: nil)
     }
 
@@ -284,6 +284,35 @@ open class DirectorServices<AppDirectorType>: NSObject {
                 continuation.resume(returning: $0)
             }
         }
+    }
+}
+
+/// A wrapped-up nav controller for modal presentation that notifies when dismissed
+class ObservingNavController: UINavigationController, UIAdaptivePresentationControllerDelegate {
+    private let done: () -> Void
+
+    init (rootViewController: UIViewController, done: @escaping () -> Void) {
+        self.done = done
+        super.init(rootViewController: rootViewController)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        presentationController?.delegate = self
+    }
+
+    /// Never block swipe-to-dismiss
+    func presentationControllerShouldDismiss(_ presentationController: UIPresentationController) -> Bool {
+        return true
+    }
+
+    /// Swipe to dismiss was not blocked and the dismiss happened.
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        done()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 
