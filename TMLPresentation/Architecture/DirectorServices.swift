@@ -252,21 +252,21 @@ open class DirectorServices<AppDirectorType>: NSObject {
     /// Push a table view onto the current navigation stack to let the user pick an object.
     /// The default table contents are according to the particular presenter but can be
     /// overridden using the 'results' parameter.
-    /// If the user picks an object then the 'done' callback is made.
-    /// If the user cancels the dialog then no callback is made.
+    /// If the user picks an object then the 'done' callback is made with the object.
+    /// If the user cancels the dialog then the 'done' callback is made with `nil`.
     public func pickThing<ModelObjectType, PresenterType>(_ newVcIdentifier: String,
                    model: Model,
                    results: ModelResults,
                    presenterFn: MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType>,
-                   done: @escaping (ModelObjectType) -> Void)
+                   done: @escaping (ModelObjectType?) -> Void)
         where ModelObjectType: ModelObject, PresenterType: Presenter {
 
         let newVc = loadVc(newVcIdentifier)
 
         let presenter = presenterFn(director, model, results.asModelResultsSet, .multi(.pick)) { [weak self] pickedItem in
-            Log.log("Director: pick object done with \(pickedItem!)")
+            Log.log("Director: pick object done with \(String(describing: pickedItem))")
             self?.currentNavController.popViewController(animated: true)
-            done(pickedItem!)
+            done(pickedItem)
         }
 
         PresenterUI.bind(viewController: newVc, presenter: presenter)
@@ -277,7 +277,7 @@ open class DirectorServices<AppDirectorType>: NSObject {
     public func pickThing<ModelObjectType, PresenterType>(_ newVcIdentifier: String,
                    model: Model,
                    results: ModelResults,
-                   presenterFn: MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async -> ModelObjectType
+                   presenterFn: MultiPresenterFn<AppDirectorType, ModelObjectType, PresenterType>) async -> ModelObjectType?
         where ModelObjectType: ModelObject, PresenterType: Presenter {
         await withCheckedContinuation { continuation in
             pickThing(newVcIdentifier, model: model, results: results, presenterFn: presenterFn) {

@@ -14,10 +14,10 @@ import UIKit
 /// SO DO NOT RENAME IT OR SUCCUMB TO TEMPTATION OF MAKING IT PRIVATE!
 ///
 final class TableFilterView: UIView {
-    var done: (() -> Void)?
+    var done: (@MainActor () -> Void)?
     @IBOutlet weak var filterLabel: UILabel!
     
-    func configure(_ label: String, done: @escaping ()->Void) {
+    func configure(_ label: String, done: @escaping @MainActor ()->Void) {
         filterLabel.text = "Filter: "+label
         self.done = done
     }
@@ -47,10 +47,17 @@ final class TableFilterView: UIView {
 /// Cares about view stuff -- filter bar, picker, create button, search controller
 /// Cares about queries.
 
+@MainActor
 open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     PresentableBasicTableVC<PresenterViewInterface>,
     UISearchResultsUpdating,
-    UISearchBarDelegate {
+    UISearchBarDelegate where PresenterViewInterface : Presenter {
+
+    deinit {
+        Task.detached { [presenter] in
+            await presenter?.cancel()
+        }
+    }
 
     private var tableFilterView: TableFilterView?
 

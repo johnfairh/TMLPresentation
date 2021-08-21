@@ -36,10 +36,16 @@ public protocol Presenter {
     /// lifetime.  This interface, which by default does nothing, is called when
     /// this happens.
     func invoke(with data: InvocationType)
+
+    /// Cancellability turns out to be endemic and useful all over the place.
+    /// Means 'end edit session immediately, discard any changes to the Thing'.
+    /// Or more broadly 'the UI is going away, time to clean up'
+    func cancel()
 }
 
 extension Presenter {
     public func invoke(with data: InvocationType) {}
+    public func cancel() {}
 }
 
 /// A type of presenter that edits some kind of Thing and needs to participate in
@@ -56,7 +62,7 @@ public protocol EditablePresenter: Presenter {
     func save()
 
     /// End the edit session immediately.  Discard any changes to the Thing.
-    func cancel()
+    /// func cancel()
 }
 
 /// The signature of a `Presenter.init` that manages one object.
