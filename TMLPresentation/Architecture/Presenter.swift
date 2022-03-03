@@ -19,7 +19,7 @@
 /// typically from a routine in the App's Director using the init routine from the Presenter protocol.
 ///
 @MainActor
-public protocol Presenter {
+public protocol Presenter: Sendable {
     associatedtype AppDirectorType
     associatedtype ModelType
     associatedtype ModelObjectType
