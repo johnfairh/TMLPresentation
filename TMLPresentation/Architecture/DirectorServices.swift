@@ -285,6 +285,23 @@ open class DirectorServices<AppDirectorType>: NSObject {
             }
         }
     }
+
+    public func checkDiscardChanges() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            alert.view.tintColor = currentNavController.navigationBar.tintColor
+
+            alert.addAction(UIAlertAction(title: "Discard Changes", style: .destructive) { _ in
+                continuation.resume(returning: true)
+            })
+
+            alert.addAction(UIAlertAction(title: "Keep Editing", style: .cancel) { _ in
+                continuation.resume(returning: false)
+            })
+
+            currentViewController.present(alert, animated: true, completion: nil)
+        }
+    }
 }
 
 /// A wrapped-up nav controller for modal presentation that notifies when dismissed
