@@ -32,7 +32,7 @@ open class PresentablePagerVC<PresenterViewInterface: PagerPresenterInterface> :
     // Doing this at any earlier (sensible) point gets overridden somewhere
     // inside UIKit.
     override open func viewDidAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+        super.viewDidAppear(animated)
         for subView in view.subviews {
             if let pageControl = subView as? UIPageControl {
                 pageControl.hidesForSinglePage = true
