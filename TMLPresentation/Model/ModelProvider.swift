@@ -38,15 +38,14 @@ public final class ModelProvider {
 
     /// Start creating a new core data stack during App.didLoad, quickly go async.
     /// Call back onto main thread when done.
-    public func load(createFreshStore: Bool, _ readyCallback: @escaping ()->Void) {
+    public func load(createFreshStore: Bool, storeBaseURL: URL, _ readyCallback: @escaping () -> Void) {
         self.readyCallback = readyCallback
 
         // Trace DB location and version
-        let directoryURL = type(of: persistentContainer).defaultDirectoryURL()
-        let dbURL        = directoryURL.appendingPathComponent("\(userDbName).sqlite")
+        let dbURL        = storeBaseURL.appendingPathComponent("\(userDbName).sqlite")
         let momVersion   = persistentContainer.managedObjectModel.versionIdentifiers.first
 
-        Log.log("Using mom \(momVersion!), database file " + dbURL.absoluteString )
+        Log.log("Using mom \(momVersion!), database file " + dbURL.path )
 
         // Debug setting to delete any prior store
         if createFreshStore {
@@ -62,6 +61,7 @@ public final class ModelProvider {
         Log.log("Init: ModelProvider: requesting background work")
 
         persistentContainer.persistentStoreDescriptions[0].shouldAddStoreAsynchronously = true
+        persistentContainer.persistentStoreDescriptions[0].url = dbURL
         persistentContainer.loadPersistentStores(completionHandler: modelDidInitialize)
     }
 

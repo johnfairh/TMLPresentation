@@ -8,7 +8,7 @@
 import Foundation
 
 //
-// ValueTransformer to store images as JPEGs in the database
+// ValueTransformer to store images as PNGs in the database
 //
 public final class ImageTransformer : ValueTransformer {
     public override class func transformedValueClass() -> AnyClass {
