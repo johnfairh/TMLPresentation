@@ -29,6 +29,7 @@ import UIKit
 ///
 /// Protocol to mark a cell associated with a particular model type
 ///
+@MainActor
 public protocol TableCell {
     associatedtype ModelType
     func configure(_ modelObject: ModelType)

@@ -54,8 +54,8 @@ open class PresentableTableVC<PresenterViewInterface: TablePresenterInterface> :
     UISearchBarDelegate where PresenterViewInterface : Presenter {
 
     deinit {
-        Task.detached { [presenter] in
-            await presenter?.cancel()
+        MainActor.assumeIsolated {
+            presenter?.cancel()
         }
     }
 

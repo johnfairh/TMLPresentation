@@ -10,6 +10,7 @@ import UIKit
 
 /// Image resizing and badging - originally guided by a stackoverflow answers
 /// but evolved under all my own horrible hard-coded ways...
+@MainActor
 extension UIImage {
 
     // This all needs sanitizing!

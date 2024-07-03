@@ -52,7 +52,7 @@ public protocol ModelObject {
 
 /// A ModelSortOrder is the name of an Int64 property that is used to sort an entity.
 /// Entities can have several such sortorders.
-public struct ModelSortOrder {
+public struct ModelSortOrder: Sendable {
     public let keyName: String
     public let ascending: Bool
     

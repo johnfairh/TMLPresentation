@@ -24,10 +24,13 @@ public protocol LogBuffer {
 }
 
 public enum Log {
+    nonisolated(unsafe)
     public static var enableDebugLogs = false
 
+    nonisolated(unsafe)
     public static var enableTableLogs = false
 
+    nonisolated(unsafe)
     public static var crashWhenPossible = false
 
     private static func logWithOsLog(message: String) {
@@ -39,6 +42,7 @@ public enum Log {
         }
     }
 
+    nonisolated(unsafe)
     public static var logBuffer: LogBuffer?
 
     private static func logWithNsLog(message: String) {

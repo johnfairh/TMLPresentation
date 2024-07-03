@@ -26,7 +26,7 @@
 public typealias ModelFieldFetchRequest = NSFetchRequest<NSDictionary>
 
 /// A type for the results of a field fetch request
-public typealias ModelFieldResults = [[String : AnyObject]]
+public typealias ModelFieldResults = [[String : AnyObject & Sendable]]
 
 /// Wrapper sequence for field-watching.  Use `Model.fieldResultsSequence(...)` to create.
 public struct ModelFieldResultsSequence: AsyncSequence {
