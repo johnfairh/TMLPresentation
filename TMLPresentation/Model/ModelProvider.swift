@@ -52,7 +52,7 @@ public final class ModelProvider {
             do {
                 Log.log("Init: ModelProvider: debugCreateFreshStore is set: simulating first-run")
                 try persistentContainer.persistentStoreCoordinator.destroyPersistentStore(
-                    at: dbURL, ofType: NSSQLiteStoreType, options: nil)
+                    at: dbURL, type: .sqlite, options: nil)
             } catch {
                 Log.fatal("Error deleting the old store: \(error)")
             }
